@@ -3,7 +3,7 @@ OUTPUT			= seabow
 SOURCES			= sources/*.cpp sources/core/*.cpp
 SOURCES_TEST	= sources/core/*.cpp tests/*.cpp
 INCLUDES		= includes
-COMMON_OPTS		= -O3 -Wall -fuse-ld=lld -std=c++17
+COMMON_OPTS		= -O3 -Wall -fuse-ld=lld -std=c++23 -m64
 ARGS			= # seabow args
 
 
@@ -12,7 +12,7 @@ cmp-l:
 	x86_64-linux-gnu-g++ $(SOURCES) -o build/linux/$(OUTPUT) -I$(INCLUDES) $(COMMON_OPTS) -pthread
 
 cmp-w:
-	x86_64-w64-mingw32-g++-win32 $(SOURCES) -o build/windows/$(OUTPUT) -I$(INCLUDES) $(COMMON_OPTS) -static-libstdc++ -static-libgcc
+	x86_64-w64-mingw32-g++ $(SOURCES) -o build/windows/$(OUTPUT) -I$(INCLUDES) $(COMMON_OPTS) -static-libstdc++ -static-libgcc
 
 cmp-d:
 	x86_64-apple-darwin15-c++ $(SOURCES) -o build/darwin/$(OUTPUT) -I$(INCLUDES) -I/usr/local/osx-ndk-x86/SDK/MacOSX10.11.sdk/usr/include -L/usr/local/osx-ndk-x86/SDK/MacOSX10.11.sdk/usr/lib -I/usr/local/osx-ndk-x86/SDK/MacOSX10.11.sdk/usr/include/c++/4.2.1 $(COMMON_OPTS)
