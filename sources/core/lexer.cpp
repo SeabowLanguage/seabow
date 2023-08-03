@@ -1,3 +1,12 @@
+/**
+ * @file lexer.cpp
+ * @author LucaStarz
+ * @brief Source code of the seabow's lexer.
+ * @date 2023-08-03
+ * 
+ * @copyright Copyright (c) 2023
+*/
+
 #include "core/lexer.hpp"
 
 Lexer::Lexer(sbw_string code)
@@ -24,7 +33,19 @@ Token *Lexer::Lex()
         return this->AdvanceWith("/", 1, TT_SLASH);
     }
 
+    if (isalpha(current) || current == '_')
+        return this->LexWord();
+
     switch (current) {
+        case '\n': {
+            sbw_ulong column = this->column;
+            sbw_ulong line = this->line;
+            this->Advance();
+            this->column = 1;
+            this->line++;
+            return new Token(TT_NEW_LINE, "\n", line, column);
+        }
+
         case '(': return this->AdvanceWith("(", 1, TT_LPAR);
         case ')': return this->AdvanceWith(")", 1, TT_RPAR);
         case '{': return this->AdvanceWith("{", 1, TT_LBRACE);
@@ -41,6 +62,68 @@ Token *Lexer::Lex()
         case '$': return this->AdvanceWith("$", 1, TT_DOLLAR);
         case '@': return this->AdvanceWith("@", 1, TT_AT);
         case '#': return this->AdvanceWith("#", 1, TT_HASH);
+
+        case '+': {
+            if (this->Get(1) == '+')
+                return this->AdvanceWith("++", 2, TT_PLUSPLUS);
+            else if (this->Get(1) == '=')
+                return this->AdvanceWith("+=", 2, TT_PLUSEQ);
+            return this->AdvanceWith("+", 1, TT_PLUS);
+        }
+
+        case '-': {
+            if (this->Get(1) == '-')
+                return this->AdvanceWith("--", 2, TT_MINUSMINUS);
+            else if (this->Get(1) == '=')
+                return this->AdvanceWith("-=", 2, TT_MINUSEQ);
+            return this->AdvanceWith("-", 1, TT_MINUS);
+        }
+
+        case '*': {
+            if (this->Get(1) == '*')
+                return this->Get(2) == '=' ? this->AdvanceWith("**=", 3, TT_POWEREQ) : this->AdvanceWith("**", 2, TT_POWER);
+            else if (this->Get(1) == '=')
+                return this->AdvanceWith("*=", 2, TT_STAREQ);
+            return this->AdvanceWith("*", 1, TT_STAR);
+        }
+
+        case '=': return this->Get(1) == '=' ? this->AdvanceWith("==", 2, TT_EE) : this->AdvanceWith("=", 1, TT_EQ);
+        case '!': return this->Get(1) == '=' ? this->AdvanceWith("!=", 2, TT_NE) : this->AdvanceWith("!", 1, TT_NOT);
+
+        case '<': {
+            if (this->Get(1) == '<')
+                return this->Get(2) == '=' ? this->AdvanceWith("<<=", 3, TT_LSHIFTEQ) : this->AdvanceWith("<<", 2, TT_LSHIFT);
+            else if (this->Get(1) == '=')
+                return this->AdvanceWith("<=", 2, TT_LESSEQ);
+            return this->AdvanceWith("<", 1, TT_LESS);
+        }
+
+        case '>': {
+            if (this->Get(1) == '>')
+                return this->Get(2) == '=' ? this->AdvanceWith(">>=", 3, TT_RSHIFTEQ) : this->AdvanceWith(">>", 2, TT_RSHIFT);
+            else if (this->Get(1) == '=')
+                return this->AdvanceWith(">=", 2, TT_GREATEQ);
+            return this->AdvanceWith(">", 1, TT_GREAT);
+        }
+
+        case '~': return this->AdvanceWith("~", 1, TT_TILDE);
+        case '^': return this->Get(1) == '=' ? this->AdvanceWith("^=", 2, TT_HATEQ) : this->AdvanceWith("^", 1, TT_HAT);
+
+        case '&': {
+            if (this->Get(1) == '&')
+                return this->AdvanceWith("&&", 2, TT_AMPAMP);
+            else if (this->Get(1) == '=')
+                return this->AdvanceWith("&=", 2, TT_AMPEQ);
+            return this->AdvanceWith("&", 1, TT_AMP);
+        }
+
+        case '|': {
+            if (this->Get(1) == '|')
+                return this->AdvanceWith("||", 2, TT_PIPEPIPE);
+            else if (this->Get(1) == '=')
+                return this->AdvanceWith("|=", 2, TT_PIPEEQ);
+            return this->AdvanceWith("|", 1, TT_PIPE);
+        }
     }
 
     sbw_string bad_text = "Unexpected character '"; bad_text += current; bad_text += '\'';
@@ -78,14 +161,8 @@ Token *Lexer::AdvanceWith(sbw_string txt, sbw_ubyte size, sbw_token_type tt)
 sbw_none Lexer::SkipSpaces(sbw_none)
 {
     char current = this->Get();
-    while (isspace(current)) {
-        if (current == '\n') {
-            this->Advance();
-            this->column = 1;
-            this->line++;
-        } else
-            this->Advance();
-        
+    while (isspace(current) && current != '\n') {
+        this->Advance();
         current = this->Get();
     }
 }
@@ -123,9 +200,29 @@ sbw_none Lexer::SkipComments(sbw_none)
             this->Advance();
             current = this->Get();
         }
-
-        this->Advance();
-        this->column = 1;
-        this->line++;
     }
+}
+
+Token *Lexer::LexWord(sbw_none)
+{
+    sbw_string word;
+    sbw_ulong column = this->column;
+    sbw_char current = this->Get();
+    while (isalpha(current) || current == '_') {
+        word += current;
+        this->Advance();
+        current = this->Get();
+    }
+
+    if (word == "null")
+        return new Token(TT_NULL, word, this->line, column);
+    else if (word == "true" || word == "false")
+        return new Token(TT_BOOLEAN, word, this->line, column);
+    else if (word == "break" || word == "continue")
+        return new Token(TT_CONTROLLER, word, this->line, column);
+    else if (word == "is")
+        return new Token(TT_IS, word, this->line, column);
+    else if (word == "in")
+        return new Token(TT_IN, word, this->line, column);
+    return new Token(TT_WORD, word, this->line, column);
 }

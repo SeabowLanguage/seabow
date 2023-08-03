@@ -1,3 +1,12 @@
+/**
+ * @file TEST.hpp
+ * @author LucaStarz
+ * @brief Test library for seabow's source code.
+ * @date 2023-08-03
+ * 
+ * @copyright Copyright (c) 2023
+*/
+
 #ifndef __SEABOW_TEST_HPP__
 #define __SEABOW_TEST_HPP__
 

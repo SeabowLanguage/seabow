@@ -1,10 +1,21 @@
+/**
+ * @file token.hpp
+ * @author LucaStarz
+ * @brief Definition of any seabow's token and operator precedence.
+ * @version 0.1
+ * @date 2023-08-03
+ * 
+ * @copyright Copyright (c) 2023
+*/
+
 #ifndef __SEABOW_TOKEN_HPP__
 #define __SEABOW_TOKEN_HPP__
 
 #include "../base.hpp"
 
 enum sbw_token_type: sbw_ubyte {
-    TT_BAD = 0xff, TT_EOF = 0xfe,
+    TT_BAD = 0xff, TT_EOF = 0xfe, 
+    TT_NEW_LINE = 0xfd, // Use for separate expressions (like ';')
 
     TT_IN = 0xfd, TT_IS = 0xfc, TT_NULL = 0xfb,
 

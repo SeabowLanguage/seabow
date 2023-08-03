@@ -1,3 +1,12 @@
+/**
+ * @file base.hpp
+ * @author LucaStarz
+ * @brief Definition of all seabow's C++ types, includes of standart libraries and OS specifications.
+ * @date 2023-08-03
+ * 
+ * @copyright Copyright (c) 2023
+*/
+
 #ifndef __SEABOW_BASE_HPP__
 #define __SEABOW_BASE_HPP__
 
