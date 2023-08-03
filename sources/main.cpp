@@ -14,6 +14,8 @@ int main(int argc, char **argv)
 #ifdef _WIN32
     SetConsoleOutputCP(1200);
     SetConsoleCP(1200);
+#else
+    std::setlocale(LC_ALL, "C.UTF-8");
 #endif
 
     while (true) {
