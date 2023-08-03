@@ -17,7 +17,7 @@ TEST_FUNC(test_lexer_position)
     IS_TRUE(tok->Column() == 1 && tok->Line() == 1, "Lexer position must be (l: 1, c: 1)");
     
     tok = lex->Lex();
-    IS_TRUE(tok->Column() == 2 && tok->Line() == 1, "Lexer position must be (l: 2, c: 1)");
+    IS_TRUE(tok->Column() == 1 && tok->Line() == 2, "Lexer position must be (l: 2, c: 1)");
 
     TEST_SUCCEED();
 }
