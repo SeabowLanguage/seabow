@@ -200,12 +200,6 @@ sbw_none Lexer::SkipComments(sbw_none)
             this->Advance();
             current = this->Get();
         }
-
-        if (current != '\0') {
-            this->Advance();
-            this->column = 1;
-            this->line++;
-        }
     }
 }
 
