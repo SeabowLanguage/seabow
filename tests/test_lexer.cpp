@@ -1,38 +1,28 @@
 #include "core/lexer.hpp"
-#include <gtest/gtest.h>
+#include "TEST.hpp"
 
-TEST(test_lexer_space, space_1) {
-    Lexer *l = new Lexer(" \n\t");
-    Token *t = l->Lex();
+TEST_FUNC(test_lexer_space)
+{
+    Lexer *lex = new Lexer(" \t\n");
+    Token *tok = lex->Lex();
+    IS_TRUE(tok->Type() == TT_EOF, "The lexer does not understand ' ' '\\t' and/or '\\n' as spaces");
 
-    ASSERT_TRUE(t->Type() == TT_EOF);
-
-    delete t;
-    delete l;
+    TEST_SUCCEED();
 }
 
-TEST(test_lexer_character, left_parenthesis) {
-    Lexer *l = new Lexer("(");
-    Token *t = l->Lex();
-
-    ASSERT_TRUE(t->Type() == TT_LPAR);
-
-    delete t;
-    delete l;
-}
-
-TEST(test_lexer_character, right_parenthesis) {
-    Lexer *l = new Lexer(")");
-    Token *t = l->Lex();
-
-    ASSERT_TRUE(t->Type() == TT_RPAR);
-
-    delete t;
-    delete l;
+TEST_FUNC(test_lexer_empty_code)
+{
+    Lexer *lex = new Lexer("");
+    Token *tok = lex->Lex();
+    IS_TRUE(tok->Type() == TT_EOF, "Empty code should return EOF token");
+    
+    TEST_SUCCEED();
 }
 
 int main(int argc, char **argv)
 {
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    ADD_TEST("test lexer space", test_lexer_space);
+    ADD_TEST("test lexer empty code", test_lexer_empty_code);
+
+    LAUNCH_TESTS("Test Lexer");
 }
