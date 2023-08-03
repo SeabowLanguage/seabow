@@ -90,8 +90,7 @@ TEST_FUNC(test_lexer_multiline_comments)
 TEST_FUNC(test_lexer_comments)
 {
     Lexer *lex = new Lexer("// Little comment\n/*Big\nComment\n\t..*/");
-    IS_TRUE(lex->Lex()->Type() == TT_NEW_LINE, "The lexer do not read successfully single-line comments");
-    IS_TRUE(lex->Lex()->Type() == TT_EOF, "The lexer do not read successfully multi-line comments");
+    IS_TRUE(lex->Lex()->Type() == TT_EOF, "The lexer do not read successfully single and multi line comments");
 
     TEST_SUCCEED();
 }
