@@ -74,7 +74,7 @@ TEST_FUNC(test_lexer_unexpected_character)
 TEST_FUNC(test_lexer_singleline_comments)
 {
     Lexer *lex = new Lexer("// Un Commentaire français\n");
-    IS_TRUE(lex->Lex()->Type() == TT_NEW_LINE, "The lexer do not read successfully the single-line comment");
+    IS_TRUE(lex->Lex()->Type() == TT_EOF, "The lexer do not read successfully the single-line comment");
 
     TEST_SUCCEED();
 }
