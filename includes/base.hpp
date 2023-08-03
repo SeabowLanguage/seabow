@@ -47,7 +47,7 @@ typedef float_t     sbw_float;
 typedef double_t    sbw_double;
 typedef __float128  sbw_ldouble;
 typedef uint8_t     sbw_bool;
-typedef char32_t    sbw_char;
-typedef std::string sbw_string;
+typedef wchar_t    sbw_char;
+typedef std::wstring sbw_string;
 
 #endif // __SEABOW_BASE_HPP__

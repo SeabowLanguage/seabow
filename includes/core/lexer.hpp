@@ -17,13 +17,17 @@ private:
     sbw_string code;
     sbw_ulong pos, line, column;
 
-    char Get(sbw_none); char Get(sbw_long offset);
+    sbw_char Get(sbw_none); sbw_char Get(sbw_long offset);
     sbw_none Advance(sbw_none);
     Token *AdvanceWith(sbw_string txt, sbw_ubyte size, sbw_token_type tt);
     sbw_none SkipSpaces(sbw_none);
-    sbw_none SkipComments(sbw_none);
+    sbw_bool SkipComments(sbw_none);
 
     Token *LexWord(sbw_none);
+    
+    sbw_char SpecialChar(sbw_none);
+    Token *LexCharacter(sbw_none);
+    Token *LexString(sbw_none);
 public:
     Lexer(sbw_string code);
     inline virtual ~Lexer() {}

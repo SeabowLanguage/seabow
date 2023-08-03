@@ -15,42 +15,42 @@
 #include <iostream>
 
 typedef struct Test {
-    std::string name;
-    std::string(*test_func)(void);
+    std::wstring name;
+    std::wstring(*test_func)(void);
 } Test;
 std::vector<Test> TESTS;
 
 
-#define TEST_FUNC(func_name) std::string func_name()
+#define TEST_FUNC(func_name) std::wstring func_name()
 #define ADD_TEST(test_name, test_function) TESTS.push_back(Test{test_name, test_function})
-#define TEST_SUCCEED() return ""
+#define TEST_SUCCEED() return L""
 #define LAUNCH_TESTS(group_name) return run_tests(group_name)
 
 #define IS_TRUE(test, message) if (!(test)) return message
 
 
 inline bool run_test(Test t) {
-    std::string msg = t.test_func();
+    std::wstring msg = t.test_func();
     if (!msg.empty()) {
-        std::cout << "\t\033[31mTest `" << t.name << "`: error -> `" << msg << "`" << "\033[0m\n";
+        std::wcout << L"\t\033[31mTest `" << t.name << L"`: error -> `" << msg << L"`" << L"\033[0m\n";
         return true;
     }
     else {
-        std::cout << "\t\033[32mTest `" << t.name << "`: passed" << "\033[0m\n";
+        std::wcout << L"\t\033[32mTest `" << t.name << L"`: passed" << L"\033[0m\n";
         return false;
     }
 }
 
-inline int run_tests(std::string group_name) {
-    std::cout << "Starting `" << group_name << "` tests...\n";
+inline int run_tests(std::wstring group_name) {
+    std::wcout << L"Starting `" << group_name << L"` tests...\n";
     unsigned int failed = 0, succeed = 0;
 
     // Run tests
     for (size_t i=0; i<TESTS.size(); i++)
         run_test(TESTS.at(i)) ? failed++ : succeed++;
 
-    if (failed > 0) std::cout << "\033[31m"; else std::cout << "\033[32m";
-    std::cout << "Ending `" << group_name << "` tests with " << failed << " failures and " << succeed << " successes" << "\033[0m\n";
+    if (failed > 0) std::wcout << L"\033[31m"; else std::wcout << L"\033[32m";
+    std::wcout << L"Ending `" << group_name << L"` tests with " << failed << L" failures and " << succeed << L" successes\033[0m\n";
     return failed > 0 ? 1 : 0;
 }
 

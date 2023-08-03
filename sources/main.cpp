@@ -12,22 +12,23 @@
 int main(int argc, char **argv)
 {
 #ifdef _WIN32
-    SetConsoleOutputCP(CP_UTF8);
-    SetConsoleCP(CP_UTF8);
+    SetConsoleOutputCP(1200);
+    SetConsoleCP(1200);
 #endif
 
     while (true) {
-        std::cout << ">>> ";
+        std::wcout << L">>> ";
         sbw_string g;
-        std::getline(std::cin, g);
-        if (g == "#exit") break;
-        printf("input: %s\n", g.c_str());
+        std::getline(std::wcin, g);
+        if (g == L"#exit") break;
+        std::wcout << L"input: " << g << L"\n";
     }
 
-    std::cout << "\n";
-    std::cout << "int128: " << sizeof(sbw_int128) << "\n";
-    std::cout << "double: " << sizeof(sbw_double) << "\n";
-    std::cout << "ldouble: œœ" << sizeof(sbw_ldouble) << "\n";
+    std::wcout << L"\n";
+    std::wcout << L"int128: " << sizeof(sbw_int128) << L"\n";
+    std::wcout << L"double: " << sizeof(sbw_double) << L"\n";
+    std::wcout << L"ldouble: " << sizeof(sbw_ldouble) << L"\n";
+    std::wcout << L"char: " << sizeof(sbw_char) << L"\n";
 
     return 0;
 }
