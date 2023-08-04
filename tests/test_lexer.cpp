@@ -12,183 +12,180 @@
 
 TEST_FUNC(test_lexer_position)
 {
-    Lexer *lex = new Lexer(L"\n;\t;   ;/*abc\ndef\nghi*/");
+    Lexer *lex = new Lexer("\n;\t;   ;/*abc\ndef\nghi*/");
     Token *tok = lex->Lex();
-    IS_TRUE(tok->Column() == 1 && tok->Line() == 1, L"Lexer position must be (l: 1, c: 1)");
+    IS_TRUE(tok->Column() == 1 && tok->Line() == 1, "Lexer position must be (l: 1, c: 1)");
     
     tok = lex->Lex();
-    IS_TRUE(tok->Column() == 1 && tok->Line() == 2, L"Lexer position must be (l: 2, c: 1)");
+    IS_TRUE(tok->Column() == 1 && tok->Line() == 2, "Lexer position must be (l: 2, c: 1)");
 
     tok = lex->Lex();
-    IS_TRUE(tok->Column() == 3 && tok->Line() == 2, L"Lexer position must be (l: 2, c: 3)");
+    IS_TRUE(tok->Column() == 3 && tok->Line() == 2, "Lexer position must be (l: 2, c: 3)");
 
     tok = lex->Lex();
-    IS_TRUE(tok->Column() == 7 && tok->Line() == 2, L"Lexer position must be (l: 2, c: 7)");
+    IS_TRUE(tok->Column() == 7 && tok->Line() == 2, "Lexer position must be (l: 2, c: 7)");
 
     tok = lex->Lex();
-    IS_TRUE(tok->Column() == 6 && tok->Line() == 4, L"Lexer position must be (l: 4, c: 6)");
+    IS_TRUE(tok->Column() == 6 && tok->Line() == 4, "Lexer position must be (l: 4, c: 6)");
 
     tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_EOF, L"Expected end-of-file");
-    IS_TRUE(tok->Column() == 6 && tok->Line() == 4, L"Lexer position must be (l: 4, c: 6)");
+    IS_TRUE(tok->Type() == TT_EOF, "Expected end-of-file");
+    IS_TRUE(tok->Column() == 6 && tok->Line() == 4, "Lexer position must be (l: 4, c: 6)");
 
     TEST_SUCCEED();
 }
 
 TEST_FUNC(test_lexer_space)
 {
-    Lexer *lex = new Lexer(L" \t\v");
+    Lexer *lex = new Lexer(" \t\v");
     Token *tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_EOF, L"The lexer does not understand ' ' '\\t' and/or '\\v' as spaces");
+    IS_TRUE(tok->Type() == TT_EOF, "The lexer does not understand ' ' '\\t' and/or '\\v' as spaces");
 
     TEST_SUCCEED();
 }
 
 TEST_FUNC(test_lexer_empty_code)
 {
-    Lexer *lex = new Lexer(L"");
+    Lexer *lex = new Lexer("");
     Token *tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_EOF, L"Empty code should return EOF token");
+    IS_TRUE(tok->Type() == TT_EOF, "Empty code should return EOF token");
     
     TEST_SUCCEED();
 }
 
 TEST_FUNC(test_lexer_single_characters)
 {
-    Lexer *lex = new Lexer(L"\n(){}[];,:.?$@#");
-    IS_TRUE(lex->Lex()->Type() == TT_NEW_LINE, L"Expected '\\n'");
-    IS_TRUE(lex->Lex()->Type() == TT_LPAR, L"Expected '('");
-    IS_TRUE(lex->Lex()->Type() == TT_RPAR, L"Expected ')'");
-    IS_TRUE(lex->Lex()->Type() == TT_LBRACE, L"Expected '{'");
-    IS_TRUE(lex->Lex()->Type() == TT_RBRACE, L"Expected '}'");
-    IS_TRUE(lex->Lex()->Type() == TT_LBRACKET, L"Expected '['");
-    IS_TRUE(lex->Lex()->Type() == TT_RBRACKET, L"Expected ']'");
-    IS_TRUE(lex->Lex()->Type() == TT_SEMI, L"Expected ';'");
-    IS_TRUE(lex->Lex()->Type() == TT_COMMA, L"Expected ','");
-    IS_TRUE(lex->Lex()->Type() == TT_COLON, L"Expected ':'");
-    IS_TRUE(lex->Lex()->Type() == TT_DOT, L"Expected '.'");
-    IS_TRUE(lex->Lex()->Type() == TT_QUEST, L"Expected '?'");
-    IS_TRUE(lex->Lex()->Type() == TT_DOLLAR, L"Expected '$'");
-    IS_TRUE(lex->Lex()->Type() == TT_AT, L"Expected '@'");
-    IS_TRUE(lex->Lex()->Type() == TT_HASH, L"Expected '#'");
+    Lexer *lex = new Lexer("\n(){}[];,:.?$@#");
+    IS_TRUE(lex->Lex()->Type() == TT_NEW_LINE, "Expected '\\n'");
+    IS_TRUE(lex->Lex()->Type() == TT_LPAR, "Expected '('");
+    IS_TRUE(lex->Lex()->Type() == TT_RPAR, "Expected ')'");
+    IS_TRUE(lex->Lex()->Type() == TT_LBRACE, "Expected '{'");
+    IS_TRUE(lex->Lex()->Type() == TT_RBRACE, "Expected '}'");
+    IS_TRUE(lex->Lex()->Type() == TT_LBRACKET, "Expected '['");
+    IS_TRUE(lex->Lex()->Type() == TT_RBRACKET, "Expected ']'");
+    IS_TRUE(lex->Lex()->Type() == TT_SEMI, "Expected ';'");
+    IS_TRUE(lex->Lex()->Type() == TT_COMMA, "Expected ','");
+    IS_TRUE(lex->Lex()->Type() == TT_COLON, "Expected ':'");
+    IS_TRUE(lex->Lex()->Type() == TT_DOT, "Expected '.'");
+    IS_TRUE(lex->Lex()->Type() == TT_QUEST, "Expected '?'");
+    IS_TRUE(lex->Lex()->Type() == TT_DOLLAR, "Expected '$'");
+    IS_TRUE(lex->Lex()->Type() == TT_AT, "Expected '@'");
+    IS_TRUE(lex->Lex()->Type() == TT_HASH, "Expected '#'");
 
     TEST_SUCCEED();
 }
 
 TEST_FUNC(test_lexer_complex_characters)
 {
-    Lexer *lex = new Lexer(L"+++=+-*---=**=**<<<<=");
+    Lexer *lex = new Lexer("+++=+-*---=**=**<<<<=");
     
-    IS_TRUE(lex->Lex()->Type() == TT_PLUSPLUS, L"Expected '++'");
-    IS_TRUE(lex->Lex()->Type() == TT_PLUSEQ, L"Expected '+='");
-    IS_TRUE(lex->Lex()->Type() == TT_PLUS, L"Expected '+'");
-    IS_TRUE(lex->Lex()->Type() == TT_MINUS, L"Expected '-'");
-    IS_TRUE(lex->Lex()->Type() == TT_STAR, L"Expected '*'");
-    IS_TRUE(lex->Lex()->Type() == TT_MINUSMINUS, L"Expected '--'");
-    IS_TRUE(lex->Lex()->Type() == TT_MINUSEQ, L"Expected '-='");
-    IS_TRUE(lex->Lex()->Type() == TT_POWEREQ, L"Expected '**='");
-    IS_TRUE(lex->Lex()->Type() == TT_POWER, L"Expected '**'");
-    IS_TRUE(lex->Lex()->Type() == TT_LSHIFT, L"Expected '<<'");
-    IS_TRUE(lex->Lex()->Type() == TT_LSHIFTEQ, L"Expected '<<='");
+    IS_TRUE(lex->Lex()->Type() == TT_PLUSPLUS, "Expected '++'");
+    IS_TRUE(lex->Lex()->Type() == TT_PLUSEQ, "Expected '+='");
+    IS_TRUE(lex->Lex()->Type() == TT_PLUS, "Expected '+'");
+    IS_TRUE(lex->Lex()->Type() == TT_MINUS, "Expected '-'");
+    IS_TRUE(lex->Lex()->Type() == TT_STAR, "Expected '*'");
+    IS_TRUE(lex->Lex()->Type() == TT_MINUSMINUS, "Expected '--'");
+    IS_TRUE(lex->Lex()->Type() == TT_MINUSEQ, "Expected '-='");
+    IS_TRUE(lex->Lex()->Type() == TT_POWEREQ, "Expected '**='");
+    IS_TRUE(lex->Lex()->Type() == TT_POWER, "Expected '**'");
+    IS_TRUE(lex->Lex()->Type() == TT_LSHIFT, "Expected '<<'");
+    IS_TRUE(lex->Lex()->Type() == TT_LSHIFTEQ, "Expected '<<='");
 
     TEST_SUCCEED();
 }
 
 TEST_FUNC(test_lexer_unexpected_character)
 {
-    Lexer *lex = new Lexer(L"`§");
+    Lexer *lex = new Lexer("`");
     Token *tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_BAD && tok->Text() == L"Unexpected character '`'", L"Character '`' is unexpected");
-
-    tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_BAD && tok->Text() == L"Unexpected character '§'", L"Character '§' is unexpected");
+    IS_TRUE(tok->Type() == TT_BAD && tok->Text() == "Unexpected character '`'", "Character '`' is unexpected");
 
     TEST_SUCCEED();
 }
 
 TEST_FUNC(test_lexer_singleline_comments)
 {
-    Lexer *lex = new Lexer(L"// Un Commentaire français\n");
-    IS_TRUE(lex->Lex()->Type() == TT_NEW_LINE, L"The lexer do not read successfully the single-line comment");
+    Lexer *lex = new Lexer("// Un Commentaire français\n");
+    IS_TRUE(lex->Lex()->Type() == TT_NEW_LINE, "The lexer do not read successfully the single-line comment");
 
     TEST_SUCCEED();
 }
 
 TEST_FUNC(test_lexer_multiline_comments)
 {
-    Lexer *lex = new Lexer(L"/*Il\nétait\n\tune\nfois*/");
-    IS_TRUE(lex->Lex()->Type() == TT_NEW_LINE && lex->Lex()->Type() == TT_EOF, L"The lexer do not read successfully the multi-line comment");
+    Lexer *lex = new Lexer("/*Il\nétait\n\tune\nfois*/");
+    IS_TRUE(lex->Lex()->Type() == TT_NEW_LINE && lex->Lex()->Type() == TT_EOF, "The lexer do not read successfully the multi-line comment");
 
     TEST_SUCCEED();
 }
 
 TEST_FUNC(test_lexer_comments)
 {
-    Lexer *lex = new Lexer(L"// Little comment\n/*Big\nComment\n\t..*/");
-    IS_TRUE(lex->Lex()->Type() == TT_NEW_LINE, L"The lexer do not read successfully single-line comments");
-    IS_TRUE(lex->Lex()->Type() == TT_NEW_LINE && lex->Lex()->Type() == TT_EOF, L"The lexer do not read successfully multi-line comments");
+    Lexer *lex = new Lexer("// Little comment\n/*Big\nComment\n\t..*/");
+    IS_TRUE(lex->Lex()->Type() == TT_NEW_LINE, "The lexer do not read successfully single-line comments");
+    IS_TRUE(lex->Lex()->Type() == TT_NEW_LINE && lex->Lex()->Type() == TT_EOF, "The lexer do not read successfully multi-line comments");
 
     TEST_SUCCEED();
 }
 
 TEST_FUNC(test_lexer_special_keywords)
 {
-    Lexer *lex = new Lexer(L"null in is false true break continue");
-    IS_TRUE(lex->Lex()->Type() == TT_NULL, L"Expected 'null'");
-    IS_TRUE(lex->Lex()->Type() == TT_IN, L"Expected 'in'");
-    IS_TRUE(lex->Lex()->Type() == TT_IS, L"Expected 'is'");
+    Lexer *lex = new Lexer("null in is false true break continue");
+    IS_TRUE(lex->Lex()->Type() == TT_NULL, "Expected 'null'");
+    IS_TRUE(lex->Lex()->Type() == TT_IN, "Expected 'in'");
+    IS_TRUE(lex->Lex()->Type() == TT_IS, "Expected 'is'");
 
     Token *tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_BOOLEAN && tok->Text() == L"false", L"Expected 'false'");
+    IS_TRUE(tok->Type() == TT_BOOLEAN && tok->Text() == "false", "Expected 'false'");
     tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_BOOLEAN && tok->Text() == L"true", L"Expected 'true'");
+    IS_TRUE(tok->Type() == TT_BOOLEAN && tok->Text() == "true", "Expected 'true'");
 
     tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_CONTROLLER && tok->Text() == L"break", L"Expected 'break'");
+    IS_TRUE(tok->Type() == TT_CONTROLLER && tok->Text() == "break", "Expected 'break'");
     tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_CONTROLLER && tok->Text() == L"continue", L"Expected 'continue'");
+    IS_TRUE(tok->Type() == TT_CONTROLLER && tok->Text() == "continue", "Expected 'continue'");
 
     TEST_SUCCEED();
 }
 
 TEST_FUNC(test_lexer_words)
 {
-    Lexer *lex = new Lexer(L"word __word word__ two-word");
+    Lexer *lex = new Lexer("word __word word__ two-word");
     Token *tok;
 
     tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_WORD && tok->Text() == L"word", L"Expected word 'word'");
+    IS_TRUE(tok->Type() == TT_WORD && tok->Text() == "word", "Expected word 'word'");
 
     tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_WORD && tok->Text() == L"__word", L"Expected word '__word'");
+    IS_TRUE(tok->Type() == TT_WORD && tok->Text() == "__word", "Expected word '__word'");
 
     tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_WORD && tok->Text() == L"word__", L"Expected word 'word__'");
+    IS_TRUE(tok->Type() == TT_WORD && tok->Text() == "word__", "Expected word 'word__'");
 
     tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_WORD && tok->Text() == L"two", L"Expected word 'two'");
-    IS_TRUE(lex->Lex()->Type() == TT_MINUS, L"Expected char '-'");
+    IS_TRUE(tok->Type() == TT_WORD && tok->Text() == "two", "Expected word 'two'");
+    IS_TRUE(lex->Lex()->Type() == TT_MINUS, "Expected char '-'");
 
     tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_WORD && tok->Text() == L"word", L"Expected word 'word'");
-    IS_TRUE(lex->Lex()->Type() == TT_EOF, L"Expected end-of-file");
+    IS_TRUE(tok->Type() == TT_WORD && tok->Text() == "word", "Expected word 'word'");
+    IS_TRUE(lex->Lex()->Type() == TT_EOF, "Expected end-of-file");
 
     TEST_SUCCEED();
 }
 
 int main(int argc, char **argv)
 {
-    ADD_TEST(L"test position", test_lexer_position);
-    ADD_TEST(L"test space", test_lexer_space);
-    ADD_TEST(L"test empty code", test_lexer_empty_code);
-    ADD_TEST(L"test single characters", test_lexer_single_characters);
-    ADD_TEST(L"test complex characters", test_lexer_complex_characters);
-    ADD_TEST(L"test unexpected character", test_lexer_unexpected_character);
-    ADD_TEST(L"test single-line comments", test_lexer_singleline_comments);
-    ADD_TEST(L"test multi-line comments", test_lexer_multiline_comments);
-    ADD_TEST(L"test comments", test_lexer_comments);
-    ADD_TEST(L"test special keywords", test_lexer_special_keywords);
-    ADD_TEST(L"test words", test_lexer_words);
+    ADD_TEST("test position", test_lexer_position);
+    ADD_TEST("test space", test_lexer_space);
+    ADD_TEST("test empty code", test_lexer_empty_code);
+    ADD_TEST("test single characters", test_lexer_single_characters);
+    ADD_TEST("test complex characters", test_lexer_complex_characters);
+    ADD_TEST("test unexpected character", test_lexer_unexpected_character);
+    ADD_TEST("test single-line comments", test_lexer_singleline_comments);
+    ADD_TEST("test multi-line comments", test_lexer_multiline_comments);
+    ADD_TEST("test comments", test_lexer_comments);
+    ADD_TEST("test special keywords", test_lexer_special_keywords);
+    ADD_TEST("test words", test_lexer_words);
 
-    LAUNCH_TESTS(L"Test Lexer");
+    LAUNCH_TESTS("Test Lexer");
 }

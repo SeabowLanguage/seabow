@@ -47,7 +47,35 @@ typedef float_t     sbw_float;
 typedef double_t    sbw_double;
 typedef __float128  sbw_ldouble;
 typedef uint8_t     sbw_bool;
-typedef wchar_t    sbw_char;
-typedef std::wstring sbw_string;
+typedef char32_t    sbw_char;
+typedef std::string sbw_string;
+
+// Print function
+inline void sbw_print(sbw_ulong n, ...)
+{
+    va_list args;
+    va_start(args, n);
+    for (sbw_ulong i=0; i<n; i++) {
+        const char *txt = va_arg(args, const char*);
+#ifndef _WIN32
+        std::cout << txt;
+#else
+        wprintf(L"%s", txt);
+#endif
+    }
+    va_end(args);
+}
+
+inline std::string sbw_input(const char *txt)
+{
+    sbw_print(1, txt);
+    std::string result;
+#ifndef _WIN32
+    std::getline(std::cin, result);
+#else
+    std::getline(std::cin, result);
+#endif
+    return result;
+}
 
 #endif // __SEABOW_BASE_HPP__

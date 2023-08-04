@@ -3,7 +3,7 @@ OUTPUT			= seabow
 SOURCES			= sources/*.cpp sources/core/*.cpp
 SOURCES_TESTS	= sources/core/*.cpp
 INCLUDES		= includes
-COMMON_OPTS		= -O3 -Wall -std=c++17 -m64
+COMMON_OPTS		= -O3 -Wall -std=c++20 -m64
 ARGS			= # seabow args
 
 

@@ -11,24 +11,24 @@
 
 int main(int argc, char **argv)
 {
-#ifdef _WIN32
-    SetConsoleOutputCP(1200);
-    SetConsoleCP(1200);
+#ifdef _WIN32 // Enable UNICODE on Windows
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
 #endif
 
     while (true) {
-        std::wcout << L">>> ";
-        sbw_string g;
-        std::getline(std::wcin, g);
-        if (g == L"#exit") break;
-        std::wcout << L"input: " << g << L"\n";
+        sbw_string g = sbw_input(">>> ");
+        if (g == "#exit") break;
+
+        sbw_print(3, "input: ", g.c_str(), "\n");
     }
 
-    std::wcout << L"\n";
-    std::wcout << L"int128: " << sizeof(sbw_int128) << L"\n";
-    std::wcout << L"double: " << sizeof(sbw_double) << L"\n";
-    std::wcout << L"ldouble: " << sizeof(sbw_ldouble) << L"\n";
-    std::wcout << L"char: " << sizeof(sbw_char) << L"\n";
+    sbw_print(3, "\n\n---\nint128: ", std::to_string(sizeof(sbw_int128)).c_str(), "\n");
+    sbw_print(3, "double: ", std::to_string(sizeof(sbw_double)).c_str(), "\n");
+    sbw_print(3, "ldouble: ", std::to_string(sizeof(sbw_ldouble)).c_str(), "\n");
+    sbw_print(3, "char: ", std::to_string(sizeof(sbw_char)).c_str(), "\n");
+    sbw_print(3, "char of string: ", std::to_string(sizeof(sbw_string("²").at(0))).c_str(), "\n");
+    sbw_print(1, "平仮名, ひらがな\n---\n");
 
     return 0;
 }
