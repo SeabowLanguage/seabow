@@ -19,12 +19,12 @@ Lexer::Lexer(sbw_string code)
 Token *Lexer::Lex()
 {
     this->SkipSpaces();
-    sbw_char current = this->Get();
+    char current = this->Get();
     if (current == '\0')
         return new Token(TT_EOF, "", this->line, this->column);
     
     if (current == '/') {
-        sbw_char next = this->Get(1);
+        char next = this->Get(1);
         if (next == '/' || next == '*')
             return this->SkipComments() ? new Token(TT_NEW_LINE, "\n", this->line, this->column) : this->Lex();
         else if (next == '=')
@@ -34,6 +34,15 @@ Token *Lexer::Lex()
 
     if (isalpha(current) || current == '_')
         return this->LexWord();
+    
+    if (current >= '0' && current <= '9')
+        return this->LexNumber();
+    
+    if (current == '"')
+        return this->LexString();
+    
+    if (current == '\'')
+        return this->LexCharacter();
 
     switch (current) {
         case '\n': {
@@ -131,12 +140,12 @@ Token *Lexer::Lex()
     return bad;
 }
 
-sbw_char Lexer::Get(sbw_none)
+char Lexer::Get(sbw_none)
 {
     return this->pos < this->code.size() ? this->code.at(this->pos) : '\0';
 }
 
-sbw_char Lexer::Get(sbw_long offset)
+char Lexer::Get(sbw_long offset)
 {
     sbw_ulong index = this->pos + offset;
     return index < this->code.size() ? this->code.at(index) : '\0';   
@@ -159,9 +168,22 @@ Token *Lexer::AdvanceWith(sbw_string txt, sbw_ubyte size, sbw_token_type tt)
 
 sbw_none Lexer::SkipSpaces(sbw_none)
 {
-    sbw_char current = this->Get();
+    char current = this->Get();
     while (isspace(current) && current != '\n') {
         this->Advance();
+        current = this->Get();
+    }
+}
+
+sbw_none Lexer::SpecialSkipSpaces(sbw_none)
+{
+    char current = this->Get();
+    while (isspace(current) && current != ' ') {
+        this->Advance();
+        if (current == '\n') {
+            this->line++;
+            this->column = 1;
+        }
         current = this->Get();
     }
 }
@@ -169,7 +191,7 @@ sbw_none Lexer::SkipSpaces(sbw_none)
 sbw_bool Lexer::SkipComments(sbw_none)
 {
     this->Advance();
-    sbw_char current = this->Get();
+    char current = this->Get();
     if (current == '*') {
         bool nl = false;
         this->Advance();
@@ -215,7 +237,7 @@ Token *Lexer::LexWord(sbw_none)
 {
     sbw_string word;
     sbw_ulong column = this->column;
-    sbw_char current = this->Get();
+    char current = this->Get();
     while (isalpha(current) || current == '_') {
         word += current;
         this->Advance();
@@ -235,13 +257,119 @@ Token *Lexer::LexWord(sbw_none)
     return new Token(TT_WORD, word, this->line, column);
 }
 
-sbw_char Lexer::SpecialChar(sbw_none)
+Token *Lexer::LexNumber(sbw_none)
 {
+    return new Token(TT_BAD, "Not yet implemented", 0, 0);
+}
 
+sbw_string Lexer::SpecialChar(sbw_none)
+{
+    sbw_string c;
+
+    this->Advance();
+    switch (this->Get()) {
+        case '0': c += "\0"; break;
+        case 'n': c += "\n"; break;
+        case 't': c += "\t"; break;
+        case 'r': c += "\r"; break;
+        case 'f': c += "\f"; break;
+        case 'v': c += "\v"; break;
+        case 'b': c += "\b"; break;
+        case 'a': c += "\a"; break;
+
+        case 'u': case 'x': { // Hexadecimal char (max: 4 hex)
+            this->Advance();
+            sbw_string hex;
+            char current = this->Get();
+            if (!(current >= '0' && current <= '9') && !(current >= 'a' && current <= 'f') && !(current >= 'A' && current <= 'F'))
+                return std::string("x");
+            
+            hex += current;
+            this->Advance();
+            current = this->Get();
+            for (sbw_ubyte i=0; i<7; i++) {
+                if (!(current >= '0' && current <= '9') && !(current >= 'a' && current <= 'f') && !(current >= 'A' && current <= 'F'))
+                    break;
+                
+                hex += current;
+                this->Advance();
+                current = this->Get();
+            }
+
+            if (hex.size() % 2 != 0) hex.insert(0, 1, '0');
+            for (sbw_ubyte i=0; i<hex.size()/2; i++)
+                c += (char)(std::stoi(hex.substr(2*i, 2), nullptr, 16));
+
+            return c;
+        } break;
+
+        default: c += this->Get(); break;
+    }
+
+    this->Advance();
+    return c;
 }
 
 Token *Lexer::LexCharacter(sbw_none)
 {
+    sbw_ulong line = this->line;
     sbw_ulong column = this->column;
-    return new Token(TT_CHAR, "aq", this->line, column);
+    this->Advance();
+    this->SpecialSkipSpaces();
+    sbw_string c;
+    char current = this->Get();
+    if (current == '\\')
+        c = this->SpecialChar();
+    else {
+        sbw_ubyte nb_char = 1;
+        if ((current & 0x80) == 0)
+            nb_char = 1;
+        else if ((current >> 5) == 0x06)
+            nb_char = 2;
+        else if ((current >> 4) == 0x0E)
+            nb_char = 3;
+        else if ((current >> 3) == 0x1E)
+            nb_char = 4;
+        
+        for (; nb_char>0; nb_char--) {
+            c += current;
+            this->Advance();
+        }
+    }
+
+    this->SpecialSkipSpaces();
+    if (this->Get() != '\'')
+        return new Token(TT_BAD, "Unterminated character", line, column);
+    else if (c.size() > 4)
+        return new Token(TT_BAD, "Can not store a character in more than 32-bit", line, column);
+
+    return new Token(TT_CHAR, c, line, column);
+}
+
+Token *Lexer::LexString(sbw_none)
+{
+    sbw_ulong line = this->line;
+    sbw_ulong column = this->column;
+    this->Advance();
+    this->SpecialSkipSpaces();
+    sbw_string s;
+    char current = this->Get();
+    while (current != '"' && current != '\0') {
+        if (current == '\\')
+            s += this->SpecialChar();
+        else {
+            this->Advance();
+            s += current;
+        }
+
+        this->SpecialSkipSpaces();
+        current = this->Get();
+    }
+    
+    this->SpecialSkipSpaces();
+    if (this->Get() != '"')
+        return new Token(TT_BAD, "Unterminated string", line, column);
+
+    this->Advance();
+    return new Token(TT_STRING, s, line, column);
 }

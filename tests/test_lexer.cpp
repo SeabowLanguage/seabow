@@ -12,7 +12,7 @@
 
 TEST_FUNC(test_lexer_position)
 {
-    Lexer *lex = new Lexer("\n;\t;   ;/*abc\ndef\nghi*/");
+    Lexer *lex = new Lexer("\n;\t;   ;/*abc\ndef\nghi*/ \"é\nà\"");
     Token *tok = lex->Lex();
     IS_TRUE(tok->Column() == 1 && tok->Line() == 1, "Lexer position must be (l: 1, c: 1)");
     
@@ -29,8 +29,12 @@ TEST_FUNC(test_lexer_position)
     IS_TRUE(tok->Column() == 6 && tok->Line() == 4, "Lexer position must be (l: 4, c: 6)");
 
     tok = lex->Lex();
+    IS_TRUE(tok->Column() == 7 && tok->Line() == 4, "Lexer position must be (l: 4, c: 7)");
+
+    tok = lex->Lex();
     IS_TRUE(tok->Type() == TT_EOF, "Expected end-of-file");
-    IS_TRUE(tok->Column() == 6 && tok->Line() == 4, "Lexer position must be (l: 4, c: 6)");
+    sbw_print(3, std::to_string(tok->Line()).c_str(), std::to_string(tok->Column()).c_str(), "\n");
+    IS_TRUE(tok->Column() == 4 && tok->Line() == 5, "Lexer position must be (l: 5, c: 4)");
 
     TEST_SUCCEED();
 }
@@ -173,8 +177,23 @@ TEST_FUNC(test_lexer_words)
     TEST_SUCCEED();
 }
 
+TEST_FUNC(test_lexer_strings)
+{
+    Lexer *lex = new Lexer("\"\\xe282ac\"");
+    Token *tok = lex->Lex();
+    IS_TRUE(tok->Type() == TT_STRING && tok->Text() == "€", "Incorrect string");
+    IS_TRUE(tok->Line() == 1 && tok->Column() == 1, "Incorrect string position");
+
+    tok = lex->Lex();
+    IS_TRUE(tok->Type() == TT_EOF, "Expected end-of-file");
+
+    TEST_SUCCEED();
+}
+
 int main(int argc, char **argv)
 {
+    INIT_TEST();
+
     ADD_TEST("test position", test_lexer_position);
     ADD_TEST("test space", test_lexer_space);
     ADD_TEST("test empty code", test_lexer_empty_code);
@@ -186,6 +205,7 @@ int main(int argc, char **argv)
     ADD_TEST("test comments", test_lexer_comments);
     ADD_TEST("test special keywords", test_lexer_special_keywords);
     ADD_TEST("test words", test_lexer_words);
+    ADD_TEST("test strings", test_lexer_strings);
 
     LAUNCH_TESTS("Test Lexer");
 }

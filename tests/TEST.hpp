@@ -20,6 +20,13 @@ typedef struct Test {
 std::vector<Test> TESTS;
 
 
+inline void INIT_TEST() {
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+#endif
+}
+
 #define TEST_FUNC(func_name) sbw_string func_name()
 #define ADD_TEST(test_name, test_function) TESTS.push_back(Test{test_name, test_function})
 #define TEST_SUCCEED() return ""

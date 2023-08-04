@@ -70,11 +70,7 @@ inline std::string sbw_input(const char *txt)
 {
     sbw_print(1, txt);
     std::string result;
-#ifndef _WIN32
     std::getline(std::cin, result);
-#else
-    std::getline(std::cin, result);
-#endif
     return result;
 }
 

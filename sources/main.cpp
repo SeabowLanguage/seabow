@@ -14,6 +14,7 @@ int main(int argc, char **argv)
 #ifdef _WIN32 // Enable UNICODE on Windows
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
+    SetConsoleTitleA((LPCSTR)"seabow");
 #endif
 
     while (true) {
@@ -28,7 +29,7 @@ int main(int argc, char **argv)
     sbw_print(3, "ldouble: ", std::to_string(sizeof(sbw_ldouble)).c_str(), "\n");
     sbw_print(3, "char: ", std::to_string(sizeof(sbw_char)).c_str(), "\n");
     sbw_print(3, "char of string: ", std::to_string(sizeof(sbw_string("²").at(0))).c_str(), "\n");
-    sbw_print(1, "平仮名, ひらがな\n---\n");
+    sbw_print(1, "平仮名, ひらがな  ☠️\n---\n");
 
     return 0;
 }
