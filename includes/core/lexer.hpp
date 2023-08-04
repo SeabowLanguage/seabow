@@ -16,6 +16,7 @@ class Lexer {
 private:
     sbw_string code;
     sbw_ulong pos, line, column;
+    sbw_byte wait_for_chars;
 
     char Get(sbw_none); char Get(sbw_long offset);
     sbw_none Advance(sbw_none);

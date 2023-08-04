@@ -14,6 +14,7 @@ Lexer::Lexer(sbw_string code)
     this->code = code;
     this->pos = 0;
     this->line = this->column = 1;
+    this->wait_for_chars = 0;
 }
 
 Token *Lexer::Lex()
@@ -21,12 +22,12 @@ Token *Lexer::Lex()
     this->SkipSpaces();
     char current = this->Get();
     if (current == '\0')
-        return new Token(TT_EOF, "", this->line, this->column);
+        return new Token(TT_EOF, "<EOF>", this->line, this->column);
     
     if (current == '/') {
         char next = this->Get(1);
         if (next == '/' || next == '*')
-            return this->SkipComments() ? new Token(TT_NEW_LINE, "\n", this->line, this->column) : this->Lex();
+            return this->SkipComments() ? new Token(TT_NEW_LINE, "<NL>", this->line, this->column) : this->Lex();
         else if (next == '=')
             return this->AdvanceWith("/=", 2, TT_SLASHEQ);
         return this->AdvanceWith("/", 1, TT_SLASH);
@@ -51,7 +52,7 @@ Token *Lexer::Lex()
             this->Advance();
             this->column = 1;
             this->line++;
-            return new Token(TT_NEW_LINE, "\n", line, column);
+            return new Token(TT_NEW_LINE, "<NL>", line, column);
         }
 
         case '(': return this->AdvanceWith("(", 1, TT_LPAR);
@@ -154,7 +155,20 @@ char Lexer::Get(sbw_long offset)
 sbw_none Lexer::Advance(sbw_none)
 {
     this->pos++;
-    this->column++;
+    
+    this->wait_for_chars--;
+    if (this->wait_for_chars <= 0) {
+        this->column++;
+        char current = this->Get();
+        if (((unsigned char)current & 0x80) == 0)
+            this->wait_for_chars = 1;
+        else if (((unsigned char)current >> 5) == 0x06)
+            this->wait_for_chars = 2;
+        else if (((unsigned char)current >> 4) == 0x0E)
+            this->wait_for_chars = 3;
+        else if (((unsigned char)current >> 3) == 0x1E)
+            this->wait_for_chars = 4;
+    }
 }
 
 Token *Lexer::AdvanceWith(sbw_string txt, sbw_ubyte size, sbw_token_type tt)
@@ -277,12 +291,12 @@ sbw_string Lexer::SpecialChar(sbw_none)
         case 'b': c += "\b"; break;
         case 'a': c += "\a"; break;
 
-        case 'u': case 'x': { // Hexadecimal char (max: 4 hex)
+        case 'u': case 'x': { // Hexadecimal char (max: 8 hex)
             this->Advance();
             sbw_string hex;
             char current = this->Get();
             if (!(current >= '0' && current <= '9') && !(current >= 'a' && current <= 'f') && !(current >= 'A' && current <= 'F'))
-                return std::string("x");
+                return sbw_string("x");
             
             hex += current;
             this->Advance();
@@ -299,7 +313,57 @@ sbw_string Lexer::SpecialChar(sbw_none)
             if (hex.size() % 2 != 0) hex.insert(0, 1, '0');
             for (sbw_ubyte i=0; i<hex.size()/2; i++)
                 c += (char)(std::stoi(hex.substr(2*i, 2), nullptr, 16));
+            return c;
+        } break;
 
+        case 'o': { // Octal char (max 11 oct with first max 3)
+            this->Advance();
+            sbw_string oct;
+            char current = this->Get();
+            if (current > '7' || current < '0')
+                return sbw_string("o");
+            
+            oct += current;
+            sbw_ubyte oct_limit = current > '3' ? 9 : 10;
+            this->Advance();
+            current = this->Get();
+            for (sbw_ubyte i=0; i<oct_limit; i++) {
+                if (current > '7' || current < '0')
+                    break;
+                
+                oct += current;
+                this->Advance();
+                current = this->Get();
+            }
+
+            if (oct.size() % 4 != 0) oct.insert(0, 4 - (oct.size() % 4), '0');
+            for (sbw_ubyte i=0; i<oct.size()/4; i++)
+                c += (char)(std::stoi(oct.substr(4*i, 4), nullptr, 8));
+            return c;
+        } break;
+
+        case 'B': { // Binary char (max 32 bin)
+            this->Advance();
+            sbw_string bin;
+            char current = this->Get();
+            if (current != '0' && current != '1')
+                return sbw_string("B");
+            
+            bin += current;
+            this->Advance();
+            current = this->Get();
+            for (sbw_ubyte i=0; i<31; i++) {
+                if (current != '0' && current != '1')
+                    break;
+                
+                bin += current;
+                this->Advance();
+                current = this->Get();
+            }
+
+            if (bin.size() % 8 != 0) bin.insert(0, 8 - (bin.size() % 8), '0');
+            for (sbw_ubyte i=0; i<bin.size()/8; i++)
+                c += (char)(std::stoi(bin.substr(8*i, 8), nullptr, 2));
             return c;
         } break;
 
@@ -322,18 +386,19 @@ Token *Lexer::LexCharacter(sbw_none)
         c = this->SpecialChar();
     else {
         sbw_ubyte nb_char = 1;
-        if ((current & 0x80) == 0)
+        if (((unsigned char)current & 0x80) == 0)
             nb_char = 1;
-        else if ((current >> 5) == 0x06)
+        else if (((unsigned char)current >> 5) == 0x06)
             nb_char = 2;
-        else if ((current >> 4) == 0x0E)
+        else if (((unsigned char)current >> 4) == 0x0E)
             nb_char = 3;
-        else if ((current >> 3) == 0x1E)
+        else if (((unsigned char)current >> 3) == 0x1E)
             nb_char = 4;
         
         for (; nb_char>0; nb_char--) {
             c += current;
             this->Advance();
+            current = this->Get();
         }
     }
 
@@ -343,6 +408,7 @@ Token *Lexer::LexCharacter(sbw_none)
     else if (c.size() > 4)
         return new Token(TT_BAD, "Can not store a character in more than 32-bit", line, column);
 
+    this->Advance();
     return new Token(TT_CHAR, c, line, column);
 }
 

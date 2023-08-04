@@ -33,8 +33,7 @@ TEST_FUNC(test_lexer_position)
 
     tok = lex->Lex();
     IS_TRUE(tok->Type() == TT_EOF, "Expected end-of-file");
-    sbw_print(3, std::to_string(tok->Line()).c_str(), std::to_string(tok->Column()).c_str(), "\n");
-    IS_TRUE(tok->Column() == 4 && tok->Line() == 5, "Lexer position must be (l: 5, c: 4)");
+    IS_TRUE(tok->Column() == 3 && tok->Line() == 5, "Lexer position must be (l: 5, c: 3)");
 
     TEST_SUCCEED();
 }
@@ -44,6 +43,9 @@ TEST_FUNC(test_lexer_space)
     Lexer *lex = new Lexer(" \t\v");
     Token *tok = lex->Lex();
     IS_TRUE(tok->Type() == TT_EOF, "The lexer does not understand ' ' '\\t' and/or '\\v' as spaces");
+
+    Lexer *l = new Lexer("\"\\o61\"");
+    sbw_print(2, l->Lex()->Text().c_str(), "\n");
 
     TEST_SUCCEED();
 }
@@ -183,9 +185,18 @@ TEST_FUNC(test_lexer_strings)
     Token *tok = lex->Lex();
     IS_TRUE(tok->Type() == TT_STRING && tok->Text() == "€", "Incorrect string");
     IS_TRUE(tok->Line() == 1 && tok->Column() == 1, "Incorrect string position");
+    IS_TRUE(lex->Lex()->Type() == TT_EOF, "Expected end-of-file");
 
-    tok = lex->Lex();
-    IS_TRUE(tok->Type() == TT_EOF, "Expected end-of-file");
+    TEST_SUCCEED();
+}
+
+TEST_FUNC(test_lexer_characters)
+{
+    Lexer *lex = new Lexer("'²'");
+    Token *tok = lex->Lex();
+    IS_TRUE(tok->Type() == TT_CHAR && tok->Text() == "²", "Incorrect character");
+    IS_TRUE(tok->Line() == 1 && tok->Column() == 1, "Incorrect character position");
+    IS_TRUE(lex->Lex()->Type() == TT_EOF, "Expected end-of-file");
 
     TEST_SUCCEED();
 }
@@ -206,6 +217,7 @@ int main(int argc, char **argv)
     ADD_TEST("test special keywords", test_lexer_special_keywords);
     ADD_TEST("test words", test_lexer_words);
     ADD_TEST("test strings", test_lexer_strings);
+    ADD_TEST("test characters", test_lexer_characters);
 
     LAUNCH_TESTS("Test Lexer");
 }
