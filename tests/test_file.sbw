@@ -15,4 +15,20 @@ void main()
     ldouble j = ma.PI;
     int128 i = ano.some_calcul(j)
     o.print_in_color(i, o.Color.RED);
+    if (ano.is_error)
+        exit "Ano error"
+    
+    try {
+        i = o.calcul()
+    } catch (DivisionByZero err) {
+        print(err)
+        i = 0
+    } catch (error err) {
+        print("Unhandled error: ", err)
+        i = -1
+    } finally {
+        print("i: ", i)
+    }
+
+    delete j;
 }
