@@ -22,6 +22,8 @@
     #define SEABOW_OS           "windows"
     #define SEABOW_SHARED       "dll"
     #include <windows.h>
+    #include <codecvt>
+    static std::wstring_convert<std::codecvt_utf8<wchar_t>> SBW_WINDOWS_STRING_CONVERTER;
 #elif __APPLE__
     #define SEABOW_OS           "macos"
     #define SEABOW_SHARED       "so"
@@ -57,20 +59,28 @@ inline void sbw_print(sbw_ulong n, ...)
     va_start(args, n);
     for (sbw_ulong i=0; i<n; i++) {
         const char *txt = va_arg(args, const char*);
+
 #ifndef _WIN32
         std::cout << txt;
 #else
         wprintf(L"%s", txt);
 #endif
+
     }
     va_end(args);
 }
 
-inline std::string sbw_input(const char *txt)
+inline sbw_string sbw_input(const char *txt)
 {
     sbw_print(1, txt);
-    std::string result;
+    sbw_string result;
+
+#ifndef _WIN32
     std::getline(std::cin, result);
+#else
+    std::getline(std::cin, result);
+#endif
+    
     return result;
 }
 

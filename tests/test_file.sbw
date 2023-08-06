@@ -1,0 +1,18 @@
+#garbage_clock 0
+#always_notnull true
+
+import (
+    "other" as o,
+    "another" as ano
+)
+
+include (
+    math as ma
+)
+
+void main()
+{
+    ldouble j = ma.PI;
+    int128 i = ano.some_calcul(j)
+    o.print_in_color(i, o.Color.RED);
+}

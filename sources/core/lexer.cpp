@@ -252,7 +252,7 @@ Token *Lexer::LexWord(sbw_none)
     sbw_string word;
     sbw_ulong column = this->column;
     char current = this->Get();
-    while (isalpha(current) || current == '_') {
+    while (isalpha(current) || current == '_' || (current >= '0' && current <= '9')) {
         word += current;
         this->Advance();
         current = this->Get();
@@ -268,12 +268,111 @@ Token *Lexer::LexWord(sbw_none)
         return new Token(TT_IS, word, this->line, column);
     else if (word == "in")
         return new Token(TT_IN, word, this->line, column);
+    else if (word == "as")
+        return new Token(TT_AS, word, this->line, column);
     return new Token(TT_WORD, word, this->line, column);
 }
 
 Token *Lexer::LexNumber(sbw_none)
 {
-    return new Token(TT_BAD, "Not yet implemented", 0, 0);
+    sbw_string number;
+    sbw_ulong column = this->column;
+    sbw_ulong dots = 0, exps = 0;
+    char mode = 'i'; // i: integer, o: octal, x: hexadecimal, b: binary, f: floating, I: (u)int128, F: ldouble
+
+    char first = this->Get();
+    this->Advance();
+    char current = this->Get();
+    if (first == '0') {
+        if (current == 'o') { mode = 'o'; this->Advance(); current = this->Get(); }
+        else if (current == 'x') { mode = 'x'; this->Advance(); current = this->Get(); }
+        else if (current == 'b') { mode = 'b'; this->Advance(); current = this->Get(); }
+        else number += first;
+    } else
+        number += first;
+
+    while ((current >= '0' && current <= '9') || current == '_' || current == '.' || current == 'e' || current == 'E') {
+        if (current == 'e' || current == 'E') {
+            if (mode != 'i' && mode != 'f') {
+                this->Advance();
+                if (this->Get() == '-' || this->Get() == '+') this->Advance();
+                while ((current >= '0' && current <= '9') || current == '_' || current == '.' || current == 'e' || current == 'E') {
+                    this->Advance();
+                    current = this->Get();
+                } return new Token(TT_BAD, "Hexadecimal, octal or binary number can not be exponential number", this->line, column);
+            }
+                
+            mode = 'f';
+            exps++;
+            number += 'e';
+            this->Advance();
+            current = this->Get();
+            if (current != '-' && current != '+') {
+                while ((current >= '0' && current <= '9') || current == '_' || current == '.' || current == 'e' || current == 'E') {
+                    this->Advance();
+                    current = this->Get();
+                } return new Token(TT_BAD, "Exponential number must have '+' or '-' after 'e'", this->line, column);
+            }
+            
+            number += current;
+            this->Advance();
+            current = this->Get();
+            continue;
+        } else if (current == '.') {
+            if (mode != 'i' && mode != 'f') {
+                this->Advance();
+                while ((current >= '0' && current <= '9') || current == '_' || current == '.' || current == 'e' || current == 'E') {
+                    if ((current == 'e' || current == 'E') && (current == '-' || current == '+'))
+                        this->Advance();
+                    this->Advance();
+                    current = this->Get();
+                } return new Token(TT_BAD, "Hexadecimal, octal or binary number can not be decimal number", this->line, column);
+            }
+
+            mode = 'f';
+            dots++;
+        } else if (current == '_') {
+            this->Advance();
+            current = this->Get();
+            continue;
+        }
+
+        number += current;
+        this->Advance();
+        current = this->Get();
+    }
+
+    if (this->Get() == 'L') {
+        this->Advance();
+        if (mode == 'f')
+            return new Token(TT_BAD, "Decimal number can not have modifier 'L'", this->line, column);
+        mode = 'I';
+    }
+    else if (this->Get() == 'D') {
+        this->Advance();
+        mode = 'F';
+    }
+    
+    if (dots > 1)
+        return new Token(TT_BAD, "Decimal number can not have more than one '.'", this->line, column);
+    if (exps > 1)
+        return new Token(TT_BAD, "Exponential number can not have more than one 'e'", this->line, column);
+
+    char end_number = number.back();
+    if (end_number == '-' || end_number == '+')
+        return new Token(TT_BAD, "Exponential number must have at least 1 digit after 'e+' or 'e-'", this->line, column);
+    else if (end_number == '.')
+        return new Token(TT_BAD, "Decimal number must have at least 1 digit after '.'", this->line, column);
+
+    switch (mode) {
+        case 'o': return new Token(TT_OCTAL, number, this->line, column);
+        case 'x': return new Token(TT_HEXADECIMAL, number, this->line, column);
+        case 'b': return new Token(TT_BINARY, number, this->line, column);
+        case 'f': return new Token(TT_DECIMAL, number, this->line, column);
+        case 'I': return new Token(TT_LONG_INTEGER, number, this->line, column);
+        case 'F': return new Token(TT_LONG_DECIMAL, number, this->line, column);
+        case 'i': default: return new Token(TT_INTEGER, number, this->line, column);
+    }
 }
 
 sbw_string Lexer::SpecialChar(sbw_none)
@@ -403,10 +502,17 @@ Token *Lexer::LexCharacter(sbw_none)
     }
 
     this->SpecialSkipSpaces();
-    if (this->Get() != '\'')
+    if (this->Get() != '\'') {
+        while (this->Get() != '\'' && this->Get() != '\0') {
+            if (this->Get() == '\n') {
+                this->Advance();
+                this->column = 1;
+                this->line++;
+            } else
+                this->Advance();
+        }
         return new Token(TT_BAD, "Unterminated character", line, column);
-    else if (c.size() > 4)
-        return new Token(TT_BAD, "Can not store a character in more than 32-bit", line, column);
+    }
 
     this->Advance();
     return new Token(TT_CHAR, c, line, column);
@@ -433,8 +539,17 @@ Token *Lexer::LexString(sbw_none)
     }
     
     this->SpecialSkipSpaces();
-    if (this->Get() != '"')
+    if (this->Get() != '"') {
+        while (this->Get() != '"' && this->Get() != '\0') {
+            if (this->Get() == '\n') {
+                this->Advance();
+                this->column = 1;
+                this->line++;
+            } else
+                this->Advance();
+        }
         return new Token(TT_BAD, "Unterminated string", line, column);
+    }
 
     this->Advance();
     return new Token(TT_STRING, s, line, column);

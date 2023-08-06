@@ -17,10 +17,10 @@ enum sbw_token_type: sbw_ubyte {
     TT_BAD = 0xff, TT_EOF = 0xfe, 
     TT_NEW_LINE = 0xfd, // Use for separate expressions (like ';')
 
-    TT_IN = 0xfd, TT_IS = 0xfc, TT_NULL = 0xfb,
+    TT_IN = 0xfd, TT_IS = 0xfc, TT_AS = 0xfb, TT_NULL = 0xfa,
 
     TT_WORD = 0x00, TT_CHAR = 0x01, TT_STRING = 0x02, TT_INTEGER = 0x03, TT_DECIMAL = 0x04, TT_BOOLEAN = 0x05,
-    TT_LONG_INTEGER = 0x06, TT_LONG_DECIMAL = 0x07, TT_CONTROLLER = 0x08,
+    TT_LONG_INTEGER = 0x06, TT_LONG_DECIMAL = 0x07, TT_CONTROLLER = 0x08, TT_HEXADECIMAL = 0x09, TT_OCTAL = 0x0a, TT_BINARY = 0x0b,
 
     TT_LPAR = 0x10, TT_RPAR = 0x11, TT_LBRACE = 0x12, TT_RBRACE = 0x13, TT_LBRACKET = 0x14, TT_RBRACKET = 0x15,
     TT_SEMI = 0x16, TT_COMMA = 0x17, TT_COLON = 0x18, TT_DOT = 0x19,
