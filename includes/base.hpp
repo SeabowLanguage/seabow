@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <string>
 #include <bits/stdc++.h>
+#include <filesystem>
 
 // OS specs
 #ifdef _WIN32

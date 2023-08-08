@@ -10,6 +10,10 @@ include (
     math as ma
 )
 
+/*
+void main() is the main entry point of a seabow program.
+YOU CAN NOT compile a seabow main file that do not contains a void main function.
+*/
 void main()
 {
     ldouble j = ma.PI;
@@ -31,4 +35,33 @@ void main()
     }
 
     delete j;
+    string j = null;
+    global const undel any c = '\xe5b9b3'
+}
+
+struct vector 
+{
+    int128 x, y;
+
+    constructor (int128 _x, int128 _y) {
+        this.x = _x;
+        this.y = _y;
+    }
+
+    operator any plus(any other) {
+        if (other is vector) /* Check if other is of type of vector */ {
+            return vector(this.x + other.x, this.y + other.y)
+        }
+
+        throw error("NotImplemented", "Can not add vector with a non-vector variable")
+    }
+}
+
+abstract class vec {}
+
+sealed class vec2<vec> {} // vec2 is a child of vec
+
+enum color<ubyte> // color is assumed as a ubyte
+{
+    red, blue = 10, green = 0x2, yellow = 0o23, purple = 0b101001, pink
 }

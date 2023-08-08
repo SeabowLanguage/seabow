@@ -7,21 +7,26 @@
  * @copyright Copyright (c) 2023
 */
 
-#include "core/lexer.hpp"
+#include "core/seabow.hpp"
 
 int main(int argc, char **argv)
 {
-#ifdef _WIN32 // Enable UNICODE on Windows
-    SetConsoleOutputCP(CP_UTF8);
-    SetConsoleCP(CP_UTF8);
-    SetConsoleTitleA((LPCSTR)"seabow");
-#endif
+    std::vector<SeabowOption*> seabow_options = get_seabow_options(argc, argv);
+    SeabowOption *opt1 = seabow_options.front();
+    switch (opt1->OptionType()) {
+        case OPT_ERROR: {
+            sbw_print(3, "\033[31mERROR: ", opt1->Value().c_str(), "\n\033[0m");
+        } return 1;
 
-    while (true) {
-        sbw_string g = sbw_input(">>> ");
-        if (g == "#exit") break;
+        case OPT_HELP: {
+            sbw_print(1, "\033[36mSeabow is a tool for managing Seabow files (.sbw, .sbb)\n\n\tUsage: seabow <command> [options]\n\nSeabow commands:\n\t- <none>:\tstart seabow interpreter\n\t- int:\t\tstart seabow interpreter or interpret seabow source code (.sbw)\n\t- build:\tCompile seabow source code (.sbw) to seabow bytecode file (.sbb)\n\t- run:\t\tRun seabow bytecode file (.sbb)\n\t- cmp:\t\tCompile seabow source code (.sbw) to native code executable (.exe, ...)\n\t- pack:\t\tCompile seabow source code (.sbw) to seabow library\n\t- install:\tInstall seabow library(ies)\n\t- publish:\tManage a seabow library\n\n\nSeabow options:\n\t- -h (--help):\tShow seabow helps\n\t- -o (--output):\tSpecify an output path\n\033[0m");
+        } return 0;
 
-        sbw_print(3, "input: ", g.c_str(), "\n");
+        case OPT_INTERPRETER: {
+
+        } break;
+
+        default: break;
     }
 
     sbw_print(3, "\n\n---\nint128: ", std::to_string(sizeof(sbw_int128)).c_str(), "\n");
