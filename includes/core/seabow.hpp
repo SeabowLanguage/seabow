@@ -10,7 +10,7 @@
 #ifndef __SEABOW_HPP__
 #define __SEABOW_HPP__
 
-#include "lexer.hpp"
+#include "interpreter.hpp"
 
 inline sbw_bool string_equals(const char *a, const char *b) {
     sbw_ulong size = 0;

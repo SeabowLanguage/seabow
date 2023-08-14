@@ -1,7 +1,7 @@
 # MAKEFILE'S VARIABLES
 OUTPUT			= seabow
-SOURCES			= sources/*.cpp sources/core/*.cpp
-SOURCES_TESTS	= sources/core/*.cpp
+SOURCES			= sources/*.cpp sources/core/*.cpp sources/nodes/*.cpp sources/values/*.cpp
+SOURCES_TESTS	= sources/core/*.cpp sources/nodes/*.cpp sources/values/*.cpp
 INCLUDES		= includes
 COMMON_OPTS		= -O3 -Wall -std=c++20 -m64
 ARGS			= # seabow args
