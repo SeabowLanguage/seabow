@@ -3,15 +3,16 @@
 
 #include "node.hpp"
 
-class NodeBad: Node {
+class NodeBad: public Node {
 private:
     SBW_ValueError *error;
 
 public:
-    NodeBad(sbw_ulong line, sbw_ulong column, SBW_ValueError *err);
+    NodeBad(SBW_ValueError *err);
     inline virtual ~NodeBad(sbw_none) {}
 
     inline SBW_ValueError *Error(sbw_none) { return this->error; }
+    inline sbw_node_type Type(sbw_none) const { return SBW_NODE_BAD; }
 };
 
 #endif // __SEABOW_NODE_BAD_HPP__

@@ -8,8 +8,13 @@ private:
     std::vector<Token*> tokens;
     sbw_ulong pos;
 
+    sbw_none SkipNewLines(sbw_none);
     Token *Advance(sbw_none);
-    Node *ParseStatement(sbw_none);
+    Token *Get(sbw_none); Token *Get(sbw_long offset);
+    Node *Match(sbw_token_type t, sbw_string expected);
+
+    Node *ParseStatement(sbw_ubyte is_stat);
+    Node *ParseCompound(sbw_ubyte is_stat);
 public:
     Parser(sbw_string code);
     inline virtual ~Parser() {}

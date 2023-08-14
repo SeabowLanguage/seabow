@@ -21,11 +21,12 @@ enum sbw_value_type : sbw_ubyte {
 
 class SBW_Value {
 private:
-    sbw_value_type vtype;
 
 public:
-    inline SBW_Value(sbw_none) { this->vtype = SBW_VALUE_UNKNOWN; }
+    inline SBW_Value(sbw_none) {}
     inline virtual ~SBW_Value(sbw_none) {}
+
+    inline virtual sbw_value_type Type(sbw_none) const { return SBW_VALUE_UNKNOWN; }
 
     inline static sbw_string TypeToString(sbw_value_type vt) {
         switch (vt) {
