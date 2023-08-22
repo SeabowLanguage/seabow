@@ -1,7 +1,7 @@
-#include "node_bad.hpp"
+#include "nodes/node_bad.hpp"
 
-NodeBad::NodeBad(sbw_ulong line, sbw_ulong column, SBW_ValueError *err)
-    : Node(line, column)
+NodeBad::NodeBad(SBW_ValueError *err)
+    : Node(err->Line(), err->Column())
 {
     this->error = err;
 }

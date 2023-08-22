@@ -12,7 +12,6 @@ enum sbw_node_type : sbw_ubyte {
 class Node {
 private:
     sbw_ulong line, column;
-    sbw_node_type ntype;
 
 public:
     Node(sbw_ulong l, sbw_ulong c);
@@ -20,7 +19,7 @@ public:
 
     inline sbw_ulong Line(sbw_none) { return this->line; }
     inline sbw_ulong Column(sbw_none) { return this->column; }
-    inline sbw_node_type Type(sbw_none) { return this->ntype; }
+    inline virtual sbw_node_type Type(sbw_none) const { return SBW_NODE_UNKNOWN; }
 };
 
 #endif // __SEABOW_NODE_HPP__
