@@ -302,9 +302,9 @@ Token *Lexer::LexNumber(sbw_none)
             mode = 'f';
             exps = true;
             number += 'e';
-            this->Advance();
+            if (!err) this->Advance();
             current = this->Get();
-            if (current != '-' && current != '+')
+            if (!err && (current != '-' && current != '+'))
                 err = new Token(TT_BAD, "Exponential number must have '+' or '-' after 'e'", this->line, column);
 
             if (err) {
