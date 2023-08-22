@@ -1,12 +1,3 @@
-/**
- * @file seabow.hpp
- * @author LucaStarz
- * @brief 
- * @date 2023-08-06
- * 
- * @copyright Copyright (c) 2023
-*/
-
 #ifndef __SEABOW_HPP__
 #define __SEABOW_HPP__
 

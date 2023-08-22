@@ -70,6 +70,29 @@ Node *Parser::ParseStatement(sbw_ubyte is_stat)
     Node *node = nullptr;
     if (current->Type() == TT_LBRACE)
         return this->ParseCompound(is_stat);
+    else if (current->Type() == TT_WORD) {
+        sbw_value_type vt = Token::KeywordType(current->Text());
+        if (vt != SBW_VALUE_UNKNOWN) {
+            if (this->Get(1)->Type() != TT_LPAR)
+                node = this->ParseDeclaration(is_stat);
+            else
+                node = this->ParseConvertExpression();
+        }
+
+        // Other keywords
+    }
+
+    if (!node)
+        node = this->ParseController(is_stat);
+    
+    if (!node)
+        {} // Binary / Unary expression
+
+    if (node->Type() == SBW_NODE_BAD) return node;
+    if (!node) {
+        current = this->Get();
+        return new NodeBad(new SBW_ValueError("SyntaxError", "Invalid statement", current->Line(), current->Column()));
+    }
 
     if (is_stat % 2 == 1) {
         Token *act = this->Get();
@@ -101,4 +124,41 @@ Node *Parser::ParseCompound(sbw_ubyte is_stat)
 
     this->Advance();
     return new NodeCompound(stats);
+}
+
+Node *Parser::ParseConvertExpression(sbw_none)
+{
+    Token *current = this->Advance();
+    Node *expression = this->ParseStatement(0);
+    if (expression->Type() == SBW_NODE_BAD)
+        return expression;
+    
+    Node *err = this->Match(TT_RPAR, ")");
+    if (err) return err;
+
+    return new NodeConvert(current->Line(), current->Column(), expression);
+}
+
+Node *Parser::ParseDeclaration(sbw_ubyte is_stat)
+{
+    return nullptr;
+}
+
+Node *Parser::ParseController(sbw_ubyte ctrl)
+{
+    Token *current = this->Get();
+    if (ctrl % 10 >= 2) {
+        if (current->Text() == "break")
+            return new NodeBreak(current->Line(), this->Advance()->Column());
+        else if (current->Text() == "continue")
+            return new NodeContinue(current->Line(), this->Advance()->Column());
+    } else if (ctrl % 100 >= 10 && current->Text() == "return") {
+        current = this->Advance();
+        Node *expression = this->ParseStatement(0);
+        if (expression->Type() == SBW_NODE_BAD)
+            return expression;
+        return new NodeReturn(current->Line(), current->Column(), expression);
+    }
+
+    return nullptr;
 }

@@ -1,7 +1,7 @@
 #ifndef __SEABOW_VALUE_HPP__
 #define __SEABOW_VALUE_HPP__
 
-#include "core/lexer.hpp"
+#include "../base.hpp"
 
 enum sbw_value_type : sbw_ubyte {
     SBW_VALUE_UNKNOWN = 0xff, SBW_NULL = 0xfe,
@@ -14,7 +14,7 @@ enum sbw_value_type : sbw_ubyte {
 
     SBW_ARRAY = 0x20, SBW_LIST = 0x21, SBW_DICT = 0x22, SBW_TUPLE = 0x23,
 
-    SBW_ERROR = 0x30, SBW_TYPE = 0x31, SBW_ANY = 0x32,
+    SBW_ERROR = 0x30, SBW_TYPE = 0x31, SBW_POINTER = 0x32, SBW_ANY = 0x33,
 
     SBW_FUNCTION = 0x40, SBW_ENUMERATION = 0x41, SBW_STRUCTURE = 0x42, SBW_CLASS = 0x43
 };

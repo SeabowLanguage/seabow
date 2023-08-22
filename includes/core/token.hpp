@@ -1,17 +1,7 @@
-/**
- * @file token.hpp
- * @author LucaStarz
- * @brief Definition of any seabow's token and operator precedence.
- * @version 0.1
- * @date 2023-08-03
- * 
- * @copyright Copyright (c) 2023
-*/
-
 #ifndef __SEABOW_TOKEN_HPP__
 #define __SEABOW_TOKEN_HPP__
 
-#include "../base.hpp"
+#include "values/value_error.hpp"
 
 enum sbw_token_type: sbw_ubyte {
     TT_BAD = 0xff, TT_EOF = 0xfe, 
@@ -122,6 +112,14 @@ public:
             default:
                 return 0;
         }
+    }
+
+    inline static sbw_value_type KeywordType(std::string keyword) {
+        if (keyword == "void") return SBW_NULL;
+        else if (keyword == "byte") return SBW_BYTE;
+        else if (keyword == "ubyte") return SBW_UBYTE;
+
+        return SBW_VALUE_UNKNOWN;
     }
 };
 

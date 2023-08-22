@@ -12,7 +12,7 @@ public:
     inline virtual ~NodeCompound(sbw_none) {}
 
     inline sbw_node_type Type(sbw_none) const { return SBW_NODE_COMPOUND; }
-    inline std::vector<Node*> Statements(sbw_none) { return this->statements; }
+    inline std::vector<Node*> Statements(sbw_none) const { return this->statements; }
 };
 
 #endif // __SEABOW_NODE_COMPOUND_HPP__

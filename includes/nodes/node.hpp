@@ -1,12 +1,16 @@
 #ifndef __SEABOW_NODE_HPP__
 #define __SEABOW_NODE_HPP__
 
-#include "values/value_error.hpp"
+#include "core/lexer.hpp"
 
 enum sbw_node_type : sbw_ubyte {
     SBW_NODE_UNKNOWN = 0xff, SBW_NODE_BAD = 0xfe,
 
-    SBW_NODE_COMPOUND = 0x00
+    SBW_NODE_COMPOUND = 0x00,
+
+    SBW_NODE_RETURN = 0x0a, SBW_NODE_BREAK = 0x0b, SBW_NODE_CONTINUE = 0x0c,
+
+    SBW_NODE_CONVERT = 0x10
 };
 
 class Node {

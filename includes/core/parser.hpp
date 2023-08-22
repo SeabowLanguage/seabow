@@ -1,7 +1,7 @@
 #ifndef __SEABOW_PARSER_HPP__
 #define __SEABOW_PARSER_HPP__
 
-#include "nodes/node_compound.hpp"
+#include "nodes/node_convert.hpp"
 
 class Parser {
 private:
@@ -15,6 +15,9 @@ private:
 
     Node *ParseStatement(sbw_ubyte is_stat);
     Node *ParseCompound(sbw_ubyte is_stat);
+    Node *ParseConvertExpression(sbw_none);
+    Node *ParseDeclaration(sbw_ubyte is_stat);
+    Node *ParseController(sbw_ubyte ctrl);
 public:
     Parser(sbw_string code);
     inline virtual ~Parser() {}

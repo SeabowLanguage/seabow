@@ -9,7 +9,7 @@ ARGS			= # seabow args
 
 # PROJECT COMPILATION
 cmp-l:
-	x86_64-linux-gnu-g++ $(SOURCES) -o build/linux/$(OUTPUT) -I$(INCLUDES) $(COMMON_OPTS) -pthread
+	x86_64-linux-gnu-g++ $(SOURCES) -o build/linux/$(OUTPUT) -I$(INCLUDES) $(COMMON_OPTS)
 
 cmp-w:
 	x86_64-w64-mingw32-g++ $(SOURCES) -o build/windows/$(OUTPUT) -I$(INCLUDES) $(COMMON_OPTS) -static-libstdc++ -static-libgcc
@@ -42,7 +42,7 @@ load-d:
 
 # PROJECT TEST (LINUX)
 test-l-lexer:
-	x86_64-linux-gnu-g++ tests/test_lexer.cpp $(SOURCES_TESTS) -o tests/test_lexer.out -I$(INCLUDES) -Itests $(COMMON_OPTS) -pthread
+	x86_64-linux-gnu-g++ tests/test_lexer.cpp $(SOURCES_TESTS) -o tests/test_lexer.out -I$(INCLUDES) -Itests $(COMMON_OPTS)
 	./tests/test_lexer.out
 
 test-l-all:
@@ -51,7 +51,7 @@ test-l-all:
 
 # PROJECT TEST (WINDOWS)
 test-w-lexer:
-	x86_64-w64-mingw32-g++ tests/test_lexer.cpp $(SOURCES_TESTS) -o tests/test_lexer.exe -I$(INCLUDES) -Itests $(COMMON_OPTS) -mthreads
+	x86_64-w64-mingw32-g++ tests/test_lexer.cpp $(SOURCES_TESTS) -o tests/test_lexer.exe -I$(INCLUDES) -Itests $(COMMON_OPTS)
 	./tests/test_lexer.exe
 
 test-w-all:
