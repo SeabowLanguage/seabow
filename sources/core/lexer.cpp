@@ -277,7 +277,7 @@ Token *Lexer::LexNumber(sbw_none)
 {
     sbw_string number;
     sbw_ulong column = this->column;
-    sbw_ulong dots = 0, exps = 0;
+    sbw_bool dots = false, exps = false;
     char mode = 'i'; // i: integer, o: octal, x: hexadecimal, b: binary, f: floating, I: (u)int128, F: ldouble
 
     char first = this->Get();
@@ -293,25 +293,27 @@ Token *Lexer::LexNumber(sbw_none)
 
     while ((current >= '0' && current <= '9') || current == '_' || current == '.' || current == 'e' || current == 'E') {
         if (current == 'e' || current == 'E') {
-            if (mode != 'i' && mode != 'f') {
+            Token *err = nullptr;
+            if (mode != 'i' && mode != 'f')
+                err = new Token(TT_BAD, "Hexadecimal, octal or binary number can not be exponential number", this->line, column);
+            else if (exps)
+                err = new Token(TT_BAD, "Exponential number can not have more than one 'e'", this->line, this->column);
+            
+            mode = 'f';
+            exps = true;
+            number += 'e';
+            this->Advance();
+            current = this->Get();
+            if (current != '-' && current != '+')
+                err = new Token(TT_BAD, "Exponential number must have '+' or '-' after 'e'", this->line, column);
+
+            if (err) {
                 this->Advance();
                 if (this->Get() == '-' || this->Get() == '+') this->Advance();
                 while ((current >= '0' && current <= '9') || current == '_' || current == '.' || current == 'e' || current == 'E') {
                     this->Advance();
                     current = this->Get();
-                } return new Token(TT_BAD, "Hexadecimal, octal or binary number can not be exponential number", this->line, column);
-            }
-                
-            mode = 'f';
-            exps++;
-            number += 'e';
-            this->Advance();
-            current = this->Get();
-            if (current != '-' && current != '+') {
-                while ((current >= '0' && current <= '9') || current == '_' || current == '.' || current == 'e' || current == 'E') {
-                    this->Advance();
-                    current = this->Get();
-                } return new Token(TT_BAD, "Exponential number must have '+' or '-' after 'e'", this->line, column);
+                } return err;
             }
             
             number += current;
@@ -319,18 +321,23 @@ Token *Lexer::LexNumber(sbw_none)
             current = this->Get();
             continue;
         } else if (current == '.') {
-            if (mode != 'i' && mode != 'f') {
+            Token *err = nullptr;
+            if (mode != 'i' && mode != 'f')
+                err = new Token(TT_BAD, "Hexadecimal, octal or binary number can not be decimal number", this->line, column);
+            else if (dots)
+                err = new Token(TT_BAD, "Decimal number can not have more than one '.'", this->line, this->column);
+            
+            if (err) {
                 this->Advance();
                 while ((current >= '0' && current <= '9') || current == '_' || current == '.' || current == 'e' || current == 'E') {
                     if ((current == 'e' || current == 'E') && (current == '-' || current == '+'))
                         this->Advance();
                     this->Advance();
                     current = this->Get();
-                } return new Token(TT_BAD, "Hexadecimal, octal or binary number can not be decimal number", this->line, column);
+                } return err;
             }
-
             mode = 'f';
-            dots++;
+            dots = true;
         } else if (current == '_') {
             this->Advance();
             current = this->Get();
@@ -352,11 +359,6 @@ Token *Lexer::LexNumber(sbw_none)
         this->Advance();
         mode = 'F';
     }
-    
-    if (dots > 1)
-        return new Token(TT_BAD, "Decimal number can not have more than one '.'", this->line, column);
-    if (exps > 1)
-        return new Token(TT_BAD, "Exponential number can not have more than one 'e'", this->line, column);
 
     char end_number = number.back();
     if (end_number == '-' || end_number == '+')

@@ -85,7 +85,6 @@ Node *Parser::ParseCompound(sbw_ubyte is_stat)
 {
     this->Advance();
     std::vector<Node*> stats;
-    Token *first = this->Get();
     sbw_ubyte is_statement = is_stat % 2 == 1 ? is_stat : is_stat + 1;
 
     Token *current = this->Get();
