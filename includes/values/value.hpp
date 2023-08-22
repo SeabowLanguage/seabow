@@ -16,7 +16,7 @@ enum sbw_value_type : sbw_ubyte {
 
     SBW_ERROR = 0x30, SBW_TYPE = 0x31, SBW_ANY = 0x32,
 
-    SBW_FUNCTION = 0x40
+    SBW_FUNCTION = 0x40, SBW_ENUMERATION = 0x41, SBW_STRUCTURE = 0x42, SBW_CLASS = 0x43
 };
 
 class SBW_Value {
