@@ -15,8 +15,8 @@
 #include <iostream>
 #include <cstdint>
 #include <string>
-#include <bits/stdc++.h>
 #include <filesystem>
+#include <vector>
 
 // OS specs
 #ifdef _WIN32
@@ -48,7 +48,7 @@ typedef __int128_t  sbw_int128;
 typedef __uint128_t sbw_uint128;
 typedef float_t     sbw_float;
 typedef double_t    sbw_double;
-typedef __float128  sbw_ldouble;
+typedef long double  sbw_ldouble;
 typedef uint8_t     sbw_bool;
 typedef char32_t    sbw_char;
 typedef std::string sbw_string;
