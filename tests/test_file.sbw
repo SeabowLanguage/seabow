@@ -1,5 +1,8 @@
-#garbage_clock 0
-#always_notnull true
+#garbage_clock 0;
+#always_notnull true;
+
+global const int128 gl = 12_123L;
+global const ldouble lgl = 12.34e+123;
 
 import (
     "other" as o,
@@ -16,6 +19,7 @@ YOU CAN NOT compile a seabow main file that do not contains a void main function
 */
 void main()
 {
+    int a, b = 12, c = null;
     ldouble j = ma.PI;
     int128 i = ano.some_calcul(j)
     o.print_in_color(i, o.Color.RED);
@@ -26,9 +30,9 @@ void main()
         i = o.calcul()
     } catch (DivisionByZero err) {
         print(err)
-        i = 0
+        i = -0b11
     } catch (error err) {
-        print("Unhandled error: ", err)
+        print("Unhandled error: \n", err)
         i = -1
     } finally {
         print("i: ", i)
@@ -63,5 +67,5 @@ sealed class vec2<vec> {} // vec2 is a child of vec
 
 enum color<ubyte> // color is assumed as a ubyte
 {
-    red, blue = 10, green = 0x2, yellow = 0o23, purple = 0b101001, pink
+    red, blue = 10, green = 0x2F, yellow = 0o27, purple = 0b101001, pink
 }

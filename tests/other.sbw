@@ -1,0 +1,4 @@
+abstract class BigNumber {
+    uint128 a, b;
+    bool signed;
+}
