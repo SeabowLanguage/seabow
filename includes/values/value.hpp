@@ -88,20 +88,20 @@ public:
     static SBW_Value *NullOpError(sbw_string op);
     
     /**
-     * @brief <static> Create a seabow error for undefined convertion between two seabow value types.
+     * @brief <static> Create a seabow error for undefined conversion between two seabow value types.
      * @param from The seabow value type of the value to convert.
      * @param to The seabow value type of the converted value.
      * @return The seabow error.
     */
-    static SBW_Value *ConvertionError(sbw_value_type from, sbw_value_type to);
+    static SBW_Value *ConversionError(sbw_value_type from, sbw_value_type to);
     
     /**
-     * @brief <static> Create a seabow error for undefined automatic convertion between two seabow value types.
+     * @brief <static> Create a seabow error for undefined automatic conversion between two seabow value types.
      * @param from The seabow value type of the value to convert.
      * @param to The seabow value type of the converted value.
      * @return The seabow error.
     */
-    static SBW_Value *AutoConvertionError(sbw_value_type from, sbw_value_type to);
+    static SBW_Value *AutoConversionError(sbw_value_type from, sbw_value_type to);
 
     /**
      * @brief <static> Create a seabow error for zero division operation error.
@@ -215,64 +215,210 @@ public:
     */
     virtual SBW_Value *rem_equals(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary bitwise exclusive or operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary ^'.
+    */
     virtual SBW_Value *bitwise_xor(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary bitwise eclusive or equals operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary ^='.
+    */
     virtual SBW_Value *bitwise_xor_equals(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary bitwise and operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary &'.
+    */
     virtual SBW_Value *bitwise_and(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary bitwise and equals operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary &='.
+    */
     virtual SBW_Value *bitwise_and_equals(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary bitwise or operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary |'.
+    */
     virtual SBW_Value *bitwise_or(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary bitwise or equals operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary |='.
+    */
     virtual SBW_Value *bitwise_or_equals(SBW_Value *other);
 
-    virtual SBW_Value *bitwise_not(SBW_Value *other);
+    /**
+     * @brief Perform an unary bitwise not operation on a seabow value.
+     * @return A seabow error for undefined operator 'unary ~'.
+    */
+    virtual SBW_Value *bitwise_not(sbw_none);
 
+    /**
+     * @brief Perform a binary assign operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary ='.
+    */
     virtual SBW_Value *assign(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary get operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary []'.
+    */
     virtual SBW_Value *get(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary set operation on three seabow values.
+     * @param index The index value of the set operation.
+     * @param other The other value of the get operation.
+     * @return A seabow error for undefined operator 'binary [] ='.
+    */
     virtual SBW_Value *set(SBW_Value *index, SBW_Value *other);
 
+    /**
+     * @brief Perform a binary left shift operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary <<'.
+    */
     virtual SBW_Value *left_shift(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary left shift equals operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary <<='.
+    */
     virtual SBW_Value *left_shift_equals(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary right shift equals operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary >>'.
+    */
     virtual SBW_Value *right_shift(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary right shift equals operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary >>='.
+    */
     virtual SBW_Value *right_shift_equals(SBW_Value *other);
 
-    virtual SBW_Value *_not(SBW_Value *other);
+    /**
+     * @brief Perform an unary not operation on a seabow value.
+     * @return A seabow error for undefined operator 'unary !'.
+    */
+    virtual SBW_Value *_not(sbw_none);
 
+    /**
+     * @brief Perform a binary equals operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary =='.
+    */
     virtual SBW_Value *equals(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary not equals operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary !='.
+    */
     virtual SBW_Value *not_equals(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary less than operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary <'.
+    */
     virtual SBW_Value *less(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary less or equals than operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary <='.
+    */
     virtual SBW_Value *less_equals(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary greater than operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary >'.
+    */
     virtual SBW_Value *great(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary greater or equals than operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary >='.
+    */
     virtual SBW_Value *great_equals(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary and operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary &&'.
+    */
     virtual SBW_Value *_and(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary or operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary ||'.
+    */
     virtual SBW_Value *_or(SBW_Value *other);
 
-    virtual SBW_Value *ref(SBW_Value *other);
+    /**
+     * @brief Perform an unary reference of operation on a seabow value.
+     * @return A seabow error for undefined operator 'binary $'.
+    */
+    virtual SBW_Value *ref(sbw_none);
 
+    /**
+     * @brief Perform a binary contains operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary in'.
+    */
     virtual SBW_Value *contains(SBW_Value *other);
 
+    /**
+     * @brief Perform a binary conversion operation on a seabow value.
+     * @param to The destination type for the conversion.
+     * @return A seabow error for undefined conversion.
+    */
     virtual SBW_Value *convert(sbw_value_type to);
 
-    virtual SBW_Value *is(SBW_Value *other);
+    /**
+     * @brief Perform a binary is operation on a seabow value.
+     * @param to The check type for the is operation.
+     * @return A seabow error for undefined operator 'binary is'.
+    */
+    virtual SBW_Value *is(sbw_value_type to);
 
+    /**
+     * @brief Perform a foreach listing operation on a seabow value.
+     * @return A seabow error for undefined operator 'left in'.
+    */
     virtual SBW_Value *for_each(sbw_none);
 
+    /**
+     * @brief Perform an automatic conversion operation on a seabow value.
+     * @param to The destination type for the conversion.
+     * @return A seabow error for undefined automatic conversion.
+    */
     virtual SBW_Value *AutoConvert(sbw_value_type to);
 
+    /**
+     * @brief Check if a seabow value is null.
+     * @return true if the seabow value is null, otherwise false.
+    */
     virtual sbw_bool IsNull(sbw_none) = 0;
 };
 

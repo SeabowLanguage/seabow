@@ -95,7 +95,10 @@ Token *Lexer::Lex()
         }
 
         case '=': return this->Get(1) == '=' ? this->AdvanceWith("==", 2, TT_EE) : this->AdvanceWith("=", 1, TT_EQ);
-        case '!': return this->Get(1) == '=' ? this->AdvanceWith("!=", 2, TT_NE) : this->AdvanceWith("!", 1, TT_NOT);
+        case '!': {
+            if (this->Get(1) == 'i' && this->Get(2) == 'n') return this->AdvanceWith("!in", 3, TT_NOT_IN);
+            return this->Get(1) == '=' ? this->AdvanceWith("!=", 2, TT_NE) : this->AdvanceWith("!", 1, TT_NOT);
+        }
 
         case '<': {
             if (this->Get(1) == '<')

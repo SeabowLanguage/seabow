@@ -24,6 +24,7 @@
     #define SEABOW_SHARED       "dll"
     #include <windows.h>
     #include <codecvt>
+    #include "bits/stdc++.h"
     static std::wstring_convert<std::codecvt_utf8<wchar_t>> SBW_WINDOWS_STRING_CONVERTER;
 #elif __APPLE__
     #define SEABOW_OS           "macos"
@@ -49,7 +50,7 @@ typedef __int128_t  sbw_int128;
 typedef __uint128_t sbw_uint128;
 typedef float_t     sbw_float;
 typedef double_t    sbw_double;
-typedef long double  sbw_ldouble;
+typedef __float128  sbw_ldouble;
 typedef uint8_t     sbw_bool;
 typedef char32_t    sbw_char;
 typedef std::string sbw_string;

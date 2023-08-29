@@ -15,14 +15,14 @@ SBW_Value *SBW_Value::NullOpError(sbw_string op)
     return new SBW_ValueError("OperatorError", "Can not use operator '" + op + "' with null value");
 }
 
-SBW_Value *SBW_Value::ConvertionError(sbw_value_type from, sbw_value_type to)
+SBW_Value *SBW_Value::ConversionError(sbw_value_type from, sbw_value_type to)
 {
-    return new SBW_ValueError("ConvertionError", "Can not convert from type " + SBW_Value::TypeToString(from) + " to type " + SBW_Value::TypeToString(to));
+    return new SBW_ValueError("ConversionError", "Can not convert from type " + SBW_Value::TypeToString(from) + " to type " + SBW_Value::TypeToString(to));
 }
 
-SBW_Value *SBW_Value::AutoConvertionError(sbw_value_type from, sbw_value_type to)
+SBW_Value *SBW_Value::AutoConversionError(sbw_value_type from, sbw_value_type to)
 {
-    return new SBW_ValueError("ConvertionError", "Can not automatically convert from type " + SBW_Value::TypeToString(from) + " to type " + SBW_Value::TypeToString(to));
+    return new SBW_ValueError("ConversionError", "Can not automatically convert from type " + SBW_Value::TypeToString(from) + " to type " + SBW_Value::TypeToString(to));
 }
 
 SBW_Value *SBW_Value::ZeroDivisionError(sbw_none)
@@ -140,8 +140,120 @@ SBW_Value *SBW_Value::bitwise_or_equals(SBW_Value *other)
     return SBW_Value::BinaryOpError("|=", this->Type(), other->Type());
 }
 
-SBW_Value *SBW_Value::bitwise_not(SBW_Value *other)
+SBW_Value *SBW_Value::bitwise_not(sbw_none)
 {
-    return SBW_Value::BinaryOpError("~", this->Type(), other->Type());
+    return SBW_Value::UnaryOpError("~", this->Type());
 }
 
+SBW_Value *SBW_Value::assign(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError("=", this->Type(), other->Type());
+}
+
+SBW_Value *SBW_Value::get(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError("[]", this->Type(), other->Type());
+}
+
+SBW_Value *SBW_Value::set(SBW_Value *index, SBW_Value *other)
+{
+    SBW_Value *err = this->get(index);
+    if (err->Type() != SBW_ERROR)
+        err = SBW_Value::BinaryOpError("[] =", this->Type(), other->Type());
+    return err;
+}
+
+SBW_Value *SBW_Value::left_shift(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError("<<", this->Type(), other->Type());
+}
+
+SBW_Value *SBW_Value::left_shift_equals(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError("<<=", this->Type(), other->Type());
+}
+
+SBW_Value *SBW_Value::right_shift(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError(">>", this->Type(), other->Type());
+}
+
+SBW_Value *SBW_Value::right_shift_equals(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError(">>=", this->Type(), other->Type());
+}
+
+SBW_Value *SBW_Value::_not(sbw_none)
+{
+    return SBW_Value::UnaryOpError("!", this->Type());
+}
+
+SBW_Value *SBW_Value::equals(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError("==", this->Type(), other->Type());
+}
+
+SBW_Value *SBW_Value::not_equals(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError("!=", this->Type(), other->Type());
+}
+
+SBW_Value *SBW_Value::less(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError("<", this->Type(), other->Type());
+}
+
+SBW_Value *SBW_Value::less_equals(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError("<=", this->Type(), other->Type());
+}
+
+SBW_Value *SBW_Value::great(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError(">", this->Type(), other->Type());
+}
+
+SBW_Value *SBW_Value::great_equals(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError(">=", this->Type(), other->Type());
+}
+
+SBW_Value *SBW_Value::_and(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError("&&", this->Type(), other->Type());
+}
+
+SBW_Value *SBW_Value::_or(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError("||", this->Type(), other->Type());
+}
+
+SBW_Value *SBW_Value::ref(sbw_none)
+{
+    return SBW_Value::UnaryOpError("$", this->Type());
+}
+
+SBW_Value *SBW_Value::contains(SBW_Value *other)
+{
+    return SBW_Value::BinaryOpError("in", this->Type(), other->Type());   
+}
+
+SBW_Value *SBW_Value::convert(sbw_value_type to)
+{
+    return SBW_Value::ConversionError(this->Type(), to);
+}
+
+SBW_Value *SBW_Value::is(sbw_value_type to)
+{
+    return SBW_Value::BinaryOpError("is", this->Type(), to);
+}
+
+SBW_Value *SBW_Value::for_each(sbw_none)
+{
+    return SBW_Value::UnaryOpError("left in", this->Type());
+}
+
+SBW_Value *SBW_Value::AutoConvert(sbw_value_type to)
+{
+    return SBW_Value::AutoConversionError(this->Type(), to);
+}

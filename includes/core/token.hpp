@@ -18,7 +18,7 @@ enum sbw_token_type: sbw_ubyte {
     TT_BAD = 0xff, TT_EOF = 0xfe, 
     TT_NEW_LINE = 0xfd, // Use for separate expressions (like ';')
 
-    TT_IN = 0xfd, TT_IS = 0xfc, TT_AS = 0xfb, TT_NULL = 0xfa,
+    TT_IN = 0xfd, TT_IS = 0xfc, TT_AS = 0xfb, TT_NULL = 0xfa, TT_NOT_IN = 0xf9,
 
     TT_WORD = 0x00, TT_CHAR = 0x01, TT_STRING = 0x02, TT_INTEGER = 0x03, TT_DECIMAL = 0x04, TT_BOOLEAN = 0x05,
     TT_LONG_INTEGER = 0x06, TT_LONG_DECIMAL = 0x07, TT_CONTROLLER = 0x08, TT_HEXADECIMAL = 0x09, TT_OCTAL = 0x0a, TT_BINARY = 0x0b,
@@ -132,7 +132,7 @@ public:
             case TT_LSHIFT: case TT_RSHIFT:
                 return 11;
 
-            case TT_IN: case TT_IS:
+            case TT_IN: case TT_NOT_IN: case TT_IS:
                 return 10;
 
             case TT_LESS: case TT_LESSEQ: case TT_GREAT: case TT_GREATEQ:
