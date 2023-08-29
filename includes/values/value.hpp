@@ -1,8 +1,19 @@
+/**
+ * @file value.hpp
+ * @author LucaStarz
+ * @brief Description of the base of any seabow values that represents literal values.
+ * @date 2023-08-29
+ * @copyright Copyright (c) 2023
+*/
+
 #ifndef __SEABOW_VALUE_HPP__
 #define __SEABOW_VALUE_HPP__
 
 #include "../base.hpp"
 
+/**
+ * @brief Specify all kind of seabow values.
+*/
 enum sbw_value_type : sbw_ubyte {
     SBW_VALUE_UNKNOWN = 0xff, SBW_NULL = 0xfe,
 
@@ -19,15 +30,29 @@ enum sbw_value_type : sbw_ubyte {
     SBW_FUNCTION = 0x40, SBW_ENUMERATION = 0x41, SBW_STRUCTURE = 0x42, SBW_CLASS = 0x43
 };
 
+/**
+ * @brief A seabow value that represents a literal value.
+*/
 class SBW_Value {
 private:
 
 public:
-    inline SBW_Value(sbw_none) {}
+    /**
+     * @brief Destroy a seabow value. 
+    */
     inline virtual ~SBW_Value(sbw_none) {}
 
+    /**
+     * @brief Get the seabow value's type of an incorrect seabow value (i.e. SBW_VALUE_UNKNOWN).
+     * @return SBW_VALUE_UNKNOWN.
+    */
     inline virtual sbw_value_type Type(sbw_none) const { return SBW_VALUE_UNKNOWN; }
 
+    /**
+     * @brief <static> Get the keyword that represents a specified seabow value's type.
+     * @param vt The specified seabow value's type.
+     * @return The keyword that represents the specified seabow value's type.
+    */
     inline static sbw_string TypeToString(sbw_value_type vt) {
         switch (vt) {
             case SBW_BYTE: return "<byte>";

@@ -37,10 +37,6 @@ std::vector<SeabowOption*> get_seabow_options(int argc, char **argv)
         seabow_options.push_back(new SeabowOption(OPT_COMPILER));
     else if (string_equals(argv[1], "pack"))
         seabow_options.push_back(new SeabowOption(OPT_PACKAGE_LIBRARY));
-    else if (string_equals(argv[1], "install"))
-        seabow_options.push_back(new SeabowOption(OPT_INSTALL));
-    else if (string_equals(argv[1], "publish"))
-        seabow_options.push_back(new SeabowOption(OPT_PUBLISH));
 
     // Parse seabow options
     for (int i=seabow_options.size()+1; i<argc; i++) {

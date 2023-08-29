@@ -1,8 +1,19 @@
+/**
+ * @file token.hpp
+ * @author LucaStarz
+ * @brief Description of a seabow token (i.e. a part of code).
+ * @date 2023-08-28
+ * @copyright Copyright (c) 2023
+*/
+
 #ifndef __SEABOW_TOKEN_HPP__
 #define __SEABOW_TOKEN_HPP__
 
 #include "values/value_error.hpp"
 
+/**
+ * @brief Specify all kind of seabow tokens.
+*/
 enum sbw_token_type: sbw_ubyte {
     TT_BAD = 0xff, TT_EOF = 0xfe, 
     TT_NEW_LINE = 0xfd, // Use for separate expressions (like ';')
@@ -25,26 +36,64 @@ enum sbw_token_type: sbw_ubyte {
     TT_AMP = 0x4d, TT_AMPEQ = 0x4e, TT_AMPAMP = 0x4f, TT_PIPE = 0x50, TT_PIPEEQ = 0x51, TT_PIPEPIPE = 0x52
 };
 
+/**
+ * @brief A seabow token that represent an analyzed part of code.
+*/
 class Token {
 private:
-    sbw_token_type tt;
-    sbw_string text;
-    sbw_ulong line, column;
+    sbw_token_type tt; // The type of token.
+    sbw_string text; // The text (or value) assigned to the token.
+    sbw_ulong line, column; // The position of the token in its file.
 
 public:
+    /**
+     * @brief Construct a new seabow token.
+     * @param tt The type of token to create.
+     * @param text The text / value to assigne to it.
+     * @param line The line of the token in its file.
+     * @param column The column of the token in its file.
+    */
     inline Token(sbw_token_type tt, sbw_string text, sbw_ulong line, sbw_ulong column) {
         this->tt = tt;
         this->text = text;
         this->line = line;
         this->column = column;
     }
+
+    /**
+     * @brief Destroy a seabow token.
+    */
     inline virtual ~Token() {}
 
+    /**
+     * @brief Get the type of the token.
+     * @return The type of the token.
+    */
     inline sbw_token_type Type() { return this->tt; }
+
+    /**
+     * @brief Get the text / value assigned to the token.
+     * @return The text / value assigned to the token.
+    */
     inline sbw_string Text() { return this->text; }
+
+    /**
+     * @brief Get the line position of the token in its file.
+     * @return The line position of the token.
+    */
     inline sbw_ulong Line() { return this->line; }
+
+    /**
+     * @brief Get the column position of the token in its file.
+     * @return The column position of the token.
+    */
     inline sbw_ulong Column() { return this->column; }
 
+    /**
+     * @brief <static> Get the precedence of an unary operator assigned to a type of token.
+     * @param t The type of the token who represents an unary operator.
+     * @return The operator precedence, or 0 if the type of token does not represents an unary operator.
+    */
     inline static sbw_ubyte GetUnaryPrecedence(sbw_token_type t) {
         switch (t) {
             case TT_DOLLAR:
@@ -64,6 +113,11 @@ public:
         }
     }
 
+    /**
+     * @brief <static> Get the precedence of a binary operator assigned to a type of token.
+     * @param t The type of the token who represents a binary operator.
+     * @return The operator precedence, or 0 if the type of token does not represents a binary operator.
+     */
     inline static sbw_ubyte GetBinaryPrecedence(sbw_token_type t) {
         switch (t) {
             case TT_PLUSPLUS: case TT_MINUSMINUS:
@@ -114,6 +168,11 @@ public:
         }
     }
 
+    /**
+     * @brief <static> Get the type of seabow value who is associated to a certain keyword.
+     * @param keyword The keyword that represents a type of seabow value.
+     * @return The type of seabow value or SBW_VALUE_UNKNOWN if the given keyword is not associated to a type of seabow value.
+    */
     inline static sbw_value_type KeywordType(std::string keyword) {
         if (keyword == "void") return SBW_NULL;
         else if (keyword == "byte") return SBW_BYTE;

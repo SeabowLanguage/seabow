@@ -556,3 +556,11 @@ Token *Lexer::LexString(sbw_none)
     this->Advance();
     return new Token(TT_STRING, s, line, column);
 }
+
+sbw_none Lexer::ReUse(sbw_string code)
+{
+    this->code = code;
+    this->column = this->line = 1;
+    this->pos = 0;
+    this->wait_for_chars = 0;
+}

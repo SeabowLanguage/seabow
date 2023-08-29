@@ -1,9 +1,8 @@
 /**
  * @file base.hpp
  * @author LucaStarz
- * @brief Definition of all seabow's C++ types, includes of standart libraries and OS specifications.
- * @date 2023-08-03
- * 
+ * @brief Description of all basic stuff of the seabow command.
+ * @date 2023-08-29
  * @copyright Copyright (c) 2023
 */
 
@@ -32,6 +31,7 @@
 #else
     #define SEABOW_OS           "linux"
     #define SEABOW_SHARED       "so"
+    #include <bits/stdc++.h>
 #endif
 
 // Seabow types
@@ -53,7 +53,11 @@ typedef uint8_t     sbw_bool;
 typedef char32_t    sbw_char;
 typedef std::string sbw_string;
 
-// Print function
+/**
+ * @brief Print multiple seabow strings on console.
+ * @param n The number of seabow strings to print.
+ * @param ... All seabow strings to print on console. 
+*/
 inline void sbw_print(sbw_ulong n, ...)
 {
     va_list args;
@@ -71,6 +75,11 @@ inline void sbw_print(sbw_ulong n, ...)
     va_end(args);
 }
 
+/**
+ * @brief Get the user's input on the console.
+ * @param txt The text to print before read user's input.
+ * @return The seabow string that represents the user's input.
+*/
 inline sbw_string sbw_input(const char *txt)
 {
     sbw_print(1, txt);

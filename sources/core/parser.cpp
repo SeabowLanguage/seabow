@@ -1,16 +1,14 @@
 #include "core/parser.hpp"
 
-Parser::Parser(sbw_string code)
+Parser::Parser(std::vector<Token*> tokens, std::unordered_map<sbw_string, NodeCompound*> *imports)
 {
-    Lexer *lex = new Lexer(code);
-    Token *tok = lex->Lex();
-    while (tok->Type() != TT_EOF) {
-        this->tokens.push_back(tok);
-        tok = lex->Lex();
-    }
-    this->tokens.push_back(tok);
-    delete lex;
+    this->tokens = tokens;
     this->pos = 0;
+    if (imports != nullptr) {
+        this->imports = imports;
+    } else {
+        this->imports = new std::unordered_map<sbw_string, NodeCompound*>();
+    }
 }
 
 NodeCompound *Parser::Parse(sbw_none)
@@ -23,7 +21,7 @@ NodeCompound *Parser::Parse(sbw_none)
         nd = this->ParseStatement(1);
     }
 
-    return new NodeCompound(stats);
+    return new NodeCompound(0, 0, stats);
 }
 
 sbw_none Parser::SkipNewLines(sbw_none)
@@ -54,7 +52,7 @@ Token *Parser::Get(sbw_long offset)
     return p >= this->tokens.size() ? this->tokens.back() : this->tokens.at(p);
 }
 
-Node *Parser::Match(sbw_token_type t, sbw_string expected)
+NodeBad *Parser::Match(sbw_token_type t, sbw_string expected)
 {
     Token *current = this->Advance();
     if (current->Type() != t)
@@ -86,7 +84,7 @@ Node *Parser::ParseStatement(sbw_ubyte is_stat)
         node = this->ParseController(is_stat);
     
     if (!node)
-        {} // Binary / Unary expression
+        node = this->ParseBinaryUnaryExpression(0);
 
     if (node->Type() == SBW_NODE_BAD) return node;
     if (!node) {
@@ -106,6 +104,7 @@ Node *Parser::ParseStatement(sbw_ubyte is_stat)
 
 Node *Parser::ParseCompound(sbw_ubyte is_stat)
 {
+    Token *start = this->Get();
     this->Advance();
     std::vector<Node*> stats;
     sbw_ubyte is_statement = is_stat % 2 == 1 ? is_stat : is_stat + 1;
@@ -123,7 +122,7 @@ Node *Parser::ParseCompound(sbw_ubyte is_stat)
         return this->Match(TT_RBRACE, "}");
 
     this->Advance();
-    return new NodeCompound(stats);
+    return new NodeCompound(start->Line(), start->Column(), stats);
 }
 
 Node *Parser::ParseConvertExpression(sbw_none)
@@ -133,7 +132,7 @@ Node *Parser::ParseConvertExpression(sbw_none)
     if (expression->Type() == SBW_NODE_BAD)
         return expression;
     
-    Node *err = this->Match(TT_RPAR, ")");
+    NodeBad *err = this->Match(TT_RPAR, ")");
     if (err) return err;
 
     return new NodeConvert(current->Line(), current->Column(), expression);
@@ -161,4 +160,124 @@ Node *Parser::ParseController(sbw_ubyte ctrl)
     }
 
     return nullptr;
+}
+
+Node *Parser::ParseBinaryUnaryExpression(sbw_ubyte precedence)
+{
+    Node *left = nullptr;
+    sbw_ubyte unary_precedence = Token::GetUnaryPrecedence(this->Get()->Type());
+    if (unary_precedence != 0 && unary_precedence >= precedence) {
+        if (unary_precedence == 2) {
+            left = this->ParseQuestionOperator();
+            if (left->Type() == SBW_NODE_BAD)
+                return left;
+        } else {
+            Token *current = this->Advance();
+            Node *operand = this->ParseBinaryUnaryExpression(unary_precedence);
+            if (operand->Type() == SBW_NODE_BAD)
+                return operand;
+            left = new NodeUnary(current->Line(), current->Column(), operand, current->Type());
+        }
+    } else {
+        left = this->ParsePrimaryExpression();
+        if (left->Type() == SBW_NODE_BAD)
+            return left;
+    }
+
+    while (true) {
+        Token *current = this->Get();
+        sbw_ubyte binary_precedence = Token::GetBinaryPrecedence(current->Type());
+        if (binary_precedence == 0 || binary_precedence <= precedence)
+            break;
+        
+        this->Advance();
+        if (binary_precedence == 17)
+            return new NodeBinary(current->Line(), current->Column(), left, nullptr, current->Type());
+
+        Node *right = this->ParseBinaryUnaryExpression(binary_precedence);
+        if (right->Type() == SBW_NODE_BAD)
+            return right;
+        
+        left = new NodeBinary(current->Line(), current->Column(), left, right, current->Type());
+    }
+
+    return left;
+}
+
+Node *Parser::ParsePrimaryExpression(sbw_none)
+{
+    Token *current = this->Get();
+    switch (current->Type()) {
+        case TT_LPAR: {
+            this->Advance();
+            Node *expression = this->ParseStatement(0);
+            if (expression->Type() == SBW_NODE_BAD)
+                return expression;
+            
+            NodeBad *err = this->Match(TT_RPAR, ")");
+            if (err) return err;
+
+            return new NodeParenthesized(current->Line(), current->Column(), expression);
+        }
+
+        case TT_INTEGER: {
+            return new NodeLiteral(current->Line(), current->Column(), nullptr);
+        }
+
+        case TT_LONG_INTEGER: {
+
+        }
+
+        case TT_DECIMAL: {
+
+        }
+
+        case TT_LONG_DECIMAL: {
+
+        }
+
+        case TT_CHAR: {
+
+        }
+
+        case TT_STRING: {
+
+        }
+
+        case TT_BOOLEAN: {
+
+        }
+
+        case TT_NULL: {
+
+        }
+
+        case TT_BAD: {
+
+        }
+
+        case TT_CONTROLLER: {
+
+        }
+
+        case TT_WORD: {
+
+        }
+
+        default: {
+            this->Advance();
+            return new NodeBad(new SBW_ValueError("SyntaxError", "Incorrect statement found", current->Line(), current->Column()));
+        }
+    }
+}
+
+Node *Parser::ParseQuestionOperator(sbw_none)
+{
+    return nullptr;
+}
+
+sbw_none Parser::ReUse(std::vector<Token*> tokens)
+{
+    this->tokens = tokens;
+    this->pos = 0;
 }

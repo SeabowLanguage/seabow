@@ -17,6 +17,18 @@ int main(int argc, char **argv)
 
         } break;
 
+        case OPT_BYTECODE_COMPILER: {
+
+        } break;
+
+        case OPT_BYTECODE_INTERPRETER: {
+
+        } break;
+
+        case OPT_COMPILER: {
+            
+        } break;
+
         default: break;
     }
 

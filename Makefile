@@ -9,13 +9,13 @@ ARGS			= # seabow args
 
 # PROJECT COMPILATION
 cmp-l:
-	x86_64-linux-gnu-g++ $(SOURCES) -o build/linux/$(OUTPUT) -I$(INCLUDES) $(COMMON_OPTS)
+	x86_64-linux-gnu-g++ $(SOURCES) -o build/linux/$(OUTPUT) -I$(INCLUDES) $(COMMON_OPTS) -static-libstdc++ -static-libgcc
 
 cmp-w:
 	x86_64-w64-mingw32-g++ $(SOURCES) -o build/windows/$(OUTPUT) -I$(INCLUDES) $(COMMON_OPTS) -static-libstdc++ -static-libgcc
 
 cmp-d:
-	clang++ -stdlib=libc++ $(SOURCES) -o build/darwin/$(OUTPUT) -I$(INCLUDES) $(COMMON_OPTS)
+	clang++ -stdlib=libc++ $(SOURCES) -o build/darwin/$(OUTPUT) -I$(INCLUDES) $(COMMON_OPTS) -static-libc++ -static-libgcc
 
 
 # PROJECT EXECUTION
