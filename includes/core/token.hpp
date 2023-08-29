@@ -29,7 +29,7 @@ enum sbw_token_type: sbw_ubyte {
 
     TT_EQ = 0x30, TT_EE = 0x31, TT_NOT = 0x32, TT_NE = 0x33,
     TT_PLUS = 0x34, TT_PLUSEQ = 0x35, TT_PLUSPLUS = 0x36, TT_MINUS = 0x37, TT_MINUSEQ = 0x38, TT_MINUSMINUS = 0x39,
-    TT_STAR = 0x3a, TT_STAREQ = 0x3b, TT_POWER = 0x3c, TT_POWEREQ = 0x3d, TT_SLASH = 0x3e, TT_SLASHEQ = 0x3f, TT_PERCENT = 0x40, TT_PERCENTEQ = 0x41,
+    TT_STAR = 0x3a, TT_STAREQ = 0x3b, TT_SLASH = 0x3e, TT_SLASHEQ = 0x3f, TT_PERCENT = 0x40, TT_PERCENTEQ = 0x41,
     TT_LESS = 0x42, TT_LESSEQ = 0x43, TT_LSHIFT = 0x44, TT_LSHIFTEQ = 0x45,
     TT_GREAT = 0x46, TT_GREATEQ = 0x47, TT_RSHIFT = 0x48, TT_RSHIFTEQ = 0x49,
     TT_TILDE = 0x4a, TT_HAT = 0x4b, TT_HATEQ = 0x4c,
@@ -123,9 +123,6 @@ public:
             case TT_PLUSPLUS: case TT_MINUSMINUS:
                 return 17;
 
-            case TT_POWER:
-                return 14;
-
             case TT_STAR: case TT_SLASH: case TT_PERCENT:
                 return 13;
 
@@ -159,7 +156,7 @@ public:
             case TT_PIPEPIPE:
                 return 3;
 
-            case TT_EQ: case TT_PLUSEQ: case TT_MINUSEQ: case TT_STAREQ: case TT_POWEREQ: case TT_SLASHEQ: case TT_PERCENTEQ:
+            case TT_EQ: case TT_PLUSEQ: case TT_MINUSEQ: case TT_STAREQ: case TT_SLASHEQ: case TT_PERCENTEQ:
             case TT_LSHIFTEQ: case TT_RSHIFTEQ: case TT_PIPEEQ: case TT_AMPEQ:
                 return 1;
 

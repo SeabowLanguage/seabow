@@ -25,6 +25,12 @@ public:
      * @return SBW_BYTE.
     */
     inline sbw_value_type Type(sbw_none) const { return SBW_BYTE; }
+
+    /**
+     * @brief Check if the seabow byte is null.
+     * @return true if the seabow byte is null, otherwise false.
+    */
+    inline sbw_bool IsNull(sbw_none) { return this->value == nullptr; }
 };
 
 #endif // __SEABOW_VALUE_BYTE_HPP__

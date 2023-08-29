@@ -16,6 +16,7 @@
 #include <string>
 #include <filesystem>
 #include <vector>
+#include <unordered_map>
 
 // OS specs
 #ifdef _WIN32

@@ -89,9 +89,7 @@ Token *Lexer::Lex()
         }
 
         case '*': {
-            if (this->Get(1) == '*')
-                return this->Get(2) == '=' ? this->AdvanceWith("**=", 3, TT_POWEREQ) : this->AdvanceWith("**", 2, TT_POWER);
-            else if (this->Get(1) == '=')
+            if (this->Get(1) == '=')
                 return this->AdvanceWith("*=", 2, TT_STAREQ);
             return this->AdvanceWith("*", 1, TT_STAR);
         }

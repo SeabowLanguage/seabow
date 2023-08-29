@@ -80,7 +80,7 @@ TEST_FUNC(test_lexer_single_characters)
 
 TEST_FUNC(test_lexer_complex_characters)
 {
-    Lexer *lex = new Lexer("+++=+-*---=**=**<<<<=");
+    Lexer *lex = new Lexer("+++=+-*---=*=>>=<<<<=");
     
     IS_TRUE(lex->Lex()->Type() == TT_PLUSPLUS, "Expected '++'");
     IS_TRUE(lex->Lex()->Type() == TT_PLUSEQ, "Expected '+='");
@@ -89,8 +89,8 @@ TEST_FUNC(test_lexer_complex_characters)
     IS_TRUE(lex->Lex()->Type() == TT_STAR, "Expected '*'");
     IS_TRUE(lex->Lex()->Type() == TT_MINUSMINUS, "Expected '--'");
     IS_TRUE(lex->Lex()->Type() == TT_MINUSEQ, "Expected '-='");
-    IS_TRUE(lex->Lex()->Type() == TT_POWEREQ, "Expected '**='");
-    IS_TRUE(lex->Lex()->Type() == TT_POWER, "Expected '**'");
+    IS_TRUE(lex->Lex()->Type() == TT_STAREQ, "Expected '*='");
+    IS_TRUE(lex->Lex()->Type() == TT_RSHIFTEQ, "Expected '>>='");
     IS_TRUE(lex->Lex()->Type() == TT_LSHIFT, "Expected '<<'");
     IS_TRUE(lex->Lex()->Type() == TT_LSHIFTEQ, "Expected '<<='");
 

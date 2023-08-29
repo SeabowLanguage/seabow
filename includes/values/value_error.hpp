@@ -77,6 +77,12 @@ public:
      * @param c The column position to set.
     */
     inline sbw_none SetPos(sbw_ulong l, sbw_ulong c) { this->line = l; this->column = c; }
+
+    /**
+     * @brief Check if the seabow error is null.
+     * @return true if the error is null, otherwise false.
+    */
+    inline sbw_bool IsNull(sbw_none) { return this->name.empty(); }
 };
 
 #endif // __SEABOW_VALUE_ERROR_HPP__

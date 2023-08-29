@@ -62,6 +62,218 @@ public:
             default: return "<unknown>";
         }
     }
+
+    /**
+     * @brief <static> Create a seabow error for undefined relation between an unary operator and a seabow value type.
+     * @param op The unary operator.
+     * @param type The seabow value type.
+     * @return The seabow error.
+    */
+    static SBW_Value *UnaryOpError(sbw_string op, sbw_value_type type);
+    
+    /**
+     * @brief <static> Create a seabow error for undefined relation bewteen a binary operator and two seabow value types.
+     * @param op The binary operator.
+     * @param t1 The first seabow value type.
+     * @param t2 The second seabow value type.
+     * @return The seabow error.
+    */
+    static SBW_Value *BinaryOpError(sbw_string op, sbw_value_type t1, sbw_value_type t2);
+    
+    /**
+     * @brief <static> Create a seabow error for undefined relation between an operator and a null value.
+     * @param op The operator.
+     * @return The seabow error.
+    */
+    static SBW_Value *NullOpError(sbw_string op);
+    
+    /**
+     * @brief <static> Create a seabow error for undefined convertion between two seabow value types.
+     * @param from The seabow value type of the value to convert.
+     * @param to The seabow value type of the converted value.
+     * @return The seabow error.
+    */
+    static SBW_Value *ConvertionError(sbw_value_type from, sbw_value_type to);
+    
+    /**
+     * @brief <static> Create a seabow error for undefined automatic convertion between two seabow value types.
+     * @param from The seabow value type of the value to convert.
+     * @param to The seabow value type of the converted value.
+     * @return The seabow error.
+    */
+    static SBW_Value *AutoConvertionError(sbw_value_type from, sbw_value_type to);
+
+    /**
+     * @brief <static> Create a seabow error for zero division operation error.
+     * @return The seabow error.
+    */
+    static SBW_Value *ZeroDivisionError(sbw_none);
+
+    /**
+     * @brief Perform an unary plus operation on a seabow value.
+     * @return A seabow error for undefined operator 'unary +'.
+    */
+    virtual SBW_Value *unary_plus(sbw_none);
+    
+    /**
+     * @brief Perform a binary plus operator on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary +'.
+    */
+    virtual SBW_Value *plus(SBW_Value *other);
+    
+    /**
+     * @brief Perform a left incrementation on a seabow value.
+     * @return A seabow error for undefined operator 'unary left ++'.
+    */
+    virtual SBW_Value *left_incr(sbw_none);
+    
+    /**
+     * @brief Perform a right incrementation on a seabow value.
+     * @return A seabow error for undefined operator 'unary right ++'.
+    */
+    virtual SBW_Value *right_incr(sbw_none);
+
+    /**
+     * @brief Perform a binary plus equals operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary +='.
+    */
+    virtual SBW_Value *plus_equals(SBW_Value *other);
+
+    /**
+     * @brief Perform an unary minus operation on a seabow value.
+     * @return A seabow error for undefined operator 'unary -'.
+    */
+    virtual SBW_Value *unary_minus(sbw_none);
+
+    /**
+     * @brief Perform a binary minus operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary -'.
+    */
+    virtual SBW_Value *minus(SBW_Value *other);
+
+    /**
+     * @brief Perform a left decrementation on a seabow value.
+     * @return A seabow error for undefined operator 'unary left --'.
+    */
+    virtual SBW_Value *left_decr(sbw_none);
+
+    /**
+     * @brief Perform an right decrementation on a seabow value.
+     * @return A seabow error for undefined operator 'unary right --'.
+    */
+    virtual SBW_Value *right_decr(sbw_none);
+
+    /**
+     * @brief Perform a binary minus equals operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary -='.
+    */
+    virtual SBW_Value *minus_equals(SBW_Value *other);
+
+    /**
+     * @brief Perform a binary times operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary *'.
+    */
+    virtual SBW_Value *times(SBW_Value *other);
+
+    /**
+     * @brief Perform a binary times equals operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary *='.
+    */
+    virtual SBW_Value *times_equals(SBW_Value *other);
+
+    /**
+     * @brief Perform a binary division operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary /'.
+    */
+    virtual SBW_Value *div(SBW_Value *other);
+
+    /**
+     * @brief Perform a binary division equals operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary /='.
+    */
+    virtual SBW_Value *div_equals(SBW_Value *other);
+
+    /**
+     * @brief Perform a binary modulo operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary %'.
+    */
+    virtual SBW_Value *rem(SBW_Value *other);
+
+    /**
+     * @brief Perform a binary modulo equals operation on two seabow values.
+     * @param other The second seabow value.
+     * @return A seabow error for undefined operator 'binary %='.
+    */
+    virtual SBW_Value *rem_equals(SBW_Value *other);
+
+    virtual SBW_Value *bitwise_xor(SBW_Value *other);
+
+    virtual SBW_Value *bitwise_xor_equals(SBW_Value *other);
+
+    virtual SBW_Value *bitwise_and(SBW_Value *other);
+
+    virtual SBW_Value *bitwise_and_equals(SBW_Value *other);
+
+    virtual SBW_Value *bitwise_or(SBW_Value *other);
+
+    virtual SBW_Value *bitwise_or_equals(SBW_Value *other);
+
+    virtual SBW_Value *bitwise_not(SBW_Value *other);
+
+    virtual SBW_Value *assign(SBW_Value *other);
+
+    virtual SBW_Value *get(SBW_Value *other);
+
+    virtual SBW_Value *set(SBW_Value *index, SBW_Value *other);
+
+    virtual SBW_Value *left_shift(SBW_Value *other);
+
+    virtual SBW_Value *left_shift_equals(SBW_Value *other);
+
+    virtual SBW_Value *right_shift(SBW_Value *other);
+
+    virtual SBW_Value *right_shift_equals(SBW_Value *other);
+
+    virtual SBW_Value *_not(SBW_Value *other);
+
+    virtual SBW_Value *equals(SBW_Value *other);
+
+    virtual SBW_Value *not_equals(SBW_Value *other);
+
+    virtual SBW_Value *less(SBW_Value *other);
+
+    virtual SBW_Value *less_equals(SBW_Value *other);
+
+    virtual SBW_Value *great(SBW_Value *other);
+
+    virtual SBW_Value *great_equals(SBW_Value *other);
+
+    virtual SBW_Value *_and(SBW_Value *other);
+
+    virtual SBW_Value *_or(SBW_Value *other);
+
+    virtual SBW_Value *ref(SBW_Value *other);
+
+    virtual SBW_Value *contains(SBW_Value *other);
+
+    virtual SBW_Value *convert(sbw_value_type to);
+
+    virtual SBW_Value *is(SBW_Value *other);
+
+    virtual SBW_Value *for_each(sbw_none);
+
+    virtual SBW_Value *AutoConvert(sbw_value_type to);
+
+    virtual sbw_bool IsNull(sbw_none) = 0;
 };
 
 #endif // __SEABOW_VALUE_HPP__
