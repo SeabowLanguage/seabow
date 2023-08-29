@@ -30,6 +30,7 @@
     #define SEABOW_OS           "macos"
     #define SEABOW_SHARED       "so"
     #include <pthread.h>
+    #include <float.h>
 #else
     #define SEABOW_OS           "linux"
     #define SEABOW_SHARED       "so"
@@ -50,7 +51,11 @@ typedef __int128_t  sbw_int128;
 typedef __uint128_t sbw_uint128;
 typedef float_t     sbw_float;
 typedef double_t    sbw_double;
-typedef __float128  sbw_ldouble;
+#ifndef __APPLE__
+    typedef __float128  sbw_ldouble;
+#else
+    typedef long double sbw_ldouble;
+#endif
 typedef uint8_t     sbw_bool;
 typedef char32_t    sbw_char;
 typedef std::string sbw_string;

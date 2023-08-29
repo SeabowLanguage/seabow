@@ -15,7 +15,7 @@ cmp-w:
 	x86_64-w64-mingw32-g++ $(SOURCES) -o build/windows/$(OUTPUT) -I$(INCLUDES) $(COMMON_OPTS) -static-libstdc++ -static-libgcc
 
 cmp-d:
-	clang++ -stdlib=libc++ $(SOURCES) -o build/darwin/$(OUTPUT) -I$(INCLUDES) $(COMMON_OPTS) -static-libc++ -static-libgcc
+	clang++ -stdlib=libc++ $(SOURCES) -o build/darwin/$(OUTPUT) -I$(INCLUDES) $(COMMON_OPTS)
 
 
 # PROJECT EXECUTION
