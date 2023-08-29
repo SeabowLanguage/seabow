@@ -9,7 +9,7 @@
 #ifndef __SEABOW_TOKEN_HPP__
 #define __SEABOW_TOKEN_HPP__
 
-#include "values/value_error.hpp"
+#include "values/value_notnull.hpp"
 
 /**
  * @brief Specify all kind of seabow tokens.

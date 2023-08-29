@@ -15,7 +15,7 @@
  * @brief Specify all kind of seabow values.
 */
 enum sbw_value_type : sbw_ubyte {
-    SBW_VALUE_UNKNOWN = 0xff, SBW_NULL = 0xfe,
+    SBW_VALUE_UNKNOWN = 0xff, SBW_NULL = 0xfe, SBW_NOTNULL = 0xfd,
 
     SBW_BYTE = 0x00, SBW_UBYTE = 0x01, SBW_SHORT = 0x02, SBW_USHORT = 0x03, SBW_INT = 0x04, SBW_UINT = 0x05,
     SBW_LONG = 0x06, SBW_ULONG = 0x07, SBW_INT128 = 0x08, SBW_UINT128 = 0x09, SBW_FLOAT = 0x0a, SBW_DOUBLE = 0x0b,
@@ -23,7 +23,7 @@ enum sbw_value_type : sbw_ubyte {
     
     SBW_CHAR = 0x1a, SBW_STRING = 0x1b,
 
-    SBW_ARRAY = 0x20, SBW_LIST = 0x21, SBW_DICT = 0x22, SBW_TUPLE = 0x23,
+    SBW_ARRAY = 0x20, SBW_LIST = 0x21, SBW_DICT = 0x22,
 
     SBW_ERROR = 0x30, SBW_TYPE = 0x31, SBW_POINTER = 0x32, SBW_ANY = 0x33,
 
