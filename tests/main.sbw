@@ -1,0 +1,3 @@
+func main(args<string>): void {
+    var number = 12.34    
+}
