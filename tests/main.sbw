@@ -1,3 +1,19 @@
 func main(args<string>): void {
-    var number = 12.34    
+    var number = 1234e-11l
+    const g = complex<float>(number, 23, opt = 4, -6.8)
+    print(g as bool);
+
+    const j = "abcdef\nghij";
+    const bin = 0o773
+    const dec = 12e+3
 }
+
+func complex<T>(x: T, args<T>, opt: T? = null): T {
+    if (opt != null)
+        return opt;
+    elif (args.length)
+        return args[0];
+    
+/* No new-line */    return x; // Comment
+} /* new-line
+*/

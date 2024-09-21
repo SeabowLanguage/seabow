@@ -1,4 +1,5 @@
 const std = @import("std");
+const chars = @import("chars.zig");
 const Position = @import("position.zig").Position;
 const SourceText = @import("source_text.zig").SourceText;
 
@@ -14,27 +15,34 @@ pub const Diagnostic = struct {
     }
 
     pub fn display(self: Diagnostic, source: SourceText) void {
-        if (source.get_line(self.position.start)) |line| {
+        const scope = source.get_line_index(self.position);
+        const color_code: []const u8 = switch (self.kind) {
+            DiagnosticKind.Info => "",
+            DiagnosticKind.Warning => "\x1b[33m",
+            DiagnosticKind.Error => "\x1b[31m",
+            DiagnosticKind.Success => "\x1b[32m",
+        };
+
+        for (scope.start..scope.end + 1) |i| {
+            const line = source.lines[i];
             std.debug.print("{s}\n", .{source.text[line.start .. line.end() - 1]});
-            for (0..(self.position.start - line.start)) |_| {
-                std.debug.print(" ", .{});
+
+            var pos: usize = line.start;
+            if (i == scope.start) {
+                chars.print_multi_char(' ', self.position.start - line.start);
+                pos += self.position.start - line.start;
             }
 
-            for (0..self.position.length) |_| {
-                std.debug.print("^", .{});
-            }
-            std.debug.print("\n", .{});
+            std.debug.print("{s}", .{color_code});
+            const limit_arrows = if (self.position.end() < line.end()) self.position.end() else line.end();
+            chars.print_multi_char('^', limit_arrows - pos);
+            std.debug.print("\x1b[0m\n", .{});
+        }
+
+        if (scope.start == scope.end) {
+            std.debug.print("{s}[At line {d}, column {d}]: {s}\x1b[0m\n\n", .{ color_code, scope.start + 1, self.position.start - source.lines[scope.start].start + 1, self.message });
         } else {
-            @panic("An error is outside the source code");
+            std.debug.print("{s}[From line {d} to line {d}]: {s}\x1b[0m\n\n", .{ color_code, scope.start + 1, scope.end + 1, self.message });
         }
-
-        switch (self.kind) {
-            DiagnosticKind.Info => {},
-            DiagnosticKind.Warning => std.debug.print("\x1b[33m", .{}),
-            DiagnosticKind.Error => std.debug.print("\x1b[31m", .{}),
-            DiagnosticKind.Success => std.debug.print("\x1b[32m", .{}),
-        }
-
-        std.debug.print("{s}\x1b[0m\n\n", .{self.message});
     }
 };

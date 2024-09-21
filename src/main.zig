@@ -2,12 +2,13 @@ const std = @import("std");
 const allocator = std.heap.page_allocator;
 
 const Diagnostic = @import("utils/diagnostic.zig").Diagnostic;
+const Parser = @import("core/parser.zig").Parser;
 const lx = @import("core/lexer.zig");
-const tk = @import("utils/token.zig");
 const SourceText = @import("utils/source_text.zig").SourceText;
 
-pub fn main() !void {
+pub fn main() !u8 {
     try lx.init_keywords();
+    defer lx.delete_keywords();
     var args = try std.process.ArgIterator.initWithAllocator(allocator);
     defer args.deinit();
 
@@ -25,22 +26,24 @@ pub fn main() !void {
     }
 
     var diagnostics = std.ArrayList(Diagnostic).init(std.heap.page_allocator);
-    var lexer = lx.Lexer.init(source_text, &diagnostics);
-    var tokens = std.ArrayList(tk.Token).init(std.heap.page_allocator);
-    var tok = try lexer.lex();
-    while (tok.kind != tk.TokenKind.EndOfFile) {
-        try tokens.append(tok);
-        tok = try lexer.lex();
-    }
+    defer diagnostics.deinit();
 
+    var parser = try Parser.init(source_text, &diagnostics);
+    const root = try parser.parse();
+
+    var return_value: u8 = 0;
     if (diagnostics.items.len == 0) {
-        for (tokens.items) |token| {
-            std.debug.print("{}\n", .{token});
+        for (parser.tokens) |token| {
+            token.display(source_text);
         }
+        root.display(0);
     } else {
         for (diagnostics.items) |diag| {
             diag.display(source_text);
         }
-        std.process.exit(1);
+
+        return_value = 1;
     }
+
+    return return_value;
 }
