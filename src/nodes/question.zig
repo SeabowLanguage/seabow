@@ -2,11 +2,11 @@ const std = @import("std");
 const Node = @import("node.zig").Node;
 
 pub const NodeQuestion = struct {
-    condition: *const Node,
-    first: *const Node,
-    second: *const Node,
+    condition: *Node,
+    first: *Node,
+    second: *Node,
 
-    pub fn init(condition: *const Node, first: *const Node, second: *const Node) NodeQuestion {
+    pub fn init(condition: *Node, first: *Node, second: *Node) NodeQuestion {
         return NodeQuestion{ .condition = condition, .first = first, .second = second };
     }
 
@@ -15,5 +15,11 @@ pub const NodeQuestion = struct {
         self.condition.*.display(indent + 2);
         self.first.*.display(indent + 2);
         self.second.*.display(indent + 2);
+    }
+
+    pub fn destroy(self: NodeQuestion) void {
+        self.condition.destroy();
+        self.first.destroy();
+        self.second.destroy();
     }
 };

@@ -2,9 +2,9 @@ const std = @import("std");
 const Node = @import("node.zig").Node;
 
 pub const NodeCompound = struct {
-    nodes: []*const Node,
+    nodes: []*Node,
 
-    pub fn init(nodes: []*const Node) NodeCompound {
+    pub fn init(nodes: []*Node) NodeCompound {
         return NodeCompound{ .nodes = nodes };
     }
 
@@ -17,6 +17,12 @@ pub const NodeCompound = struct {
 
         for (self.nodes) |nd| {
             nd.*.display(indent + 2);
+        }
+    }
+
+    pub fn destroy(self: NodeCompound) void {
+        for (self.nodes) |nd| {
+            nd.destroy();
         }
     }
 };

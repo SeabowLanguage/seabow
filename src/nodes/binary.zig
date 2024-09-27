@@ -3,11 +3,11 @@ const Token = @import("../utils/token.zig").Token;
 const Node = @import("node.zig").Node;
 
 pub const NodeBinary = struct {
-    left: *const Node,
+    left: *Node,
     operator: Token,
-    right: ?*const Node,
+    right: ?*Node,
 
-    pub fn init(left: *const Node, operator: Token, right: ?*const Node) NodeBinary {
+    pub fn init(left: *Node, operator: Token, right: ?*Node) NodeBinary {
         return NodeBinary{ .left = left, .operator = operator, .right = right };
     }
 
@@ -17,6 +17,13 @@ pub const NodeBinary = struct {
         self.left.*.display(indent + 2);
         if (self.right) |right| {
             right.*.display(indent + 2);
+        }
+    }
+
+    pub fn destroy(self: NodeBinary) void {
+        self.left.destroy();
+        if (self.right) |right| {
+            right.destroy();
         }
     }
 };
