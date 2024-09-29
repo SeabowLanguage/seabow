@@ -45,4 +45,13 @@ pub const Diagnostic = struct {
             std.debug.print("{s}[From line {d} to line {d}]: {s}\x1b[0m\n\n", .{ color_code, scope.start + 1, scope.end + 1, self.message });
         }
     }
+
+    pub fn display_error(message: []const u8, position: ?Position, source: SourceText) void {
+        if (position) |pos| {
+            const diag = Diagnostic.init(message, pos, DiagnosticKind.Error);
+            diag.display(source);
+        } else {
+            std.debug.print("\x1b[31m{s}\x1b[0m\n", .{message});
+        }
+    }
 };

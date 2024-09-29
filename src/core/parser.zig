@@ -227,6 +227,12 @@ pub const Parser = struct {
                 return try eof.copy();
             },
 
+            tok.TokenKind.Null => {
+                const lit_value = value.Value.init(value.ValueElement{ .Null = value.ValueNull{} }, value.MODIFIER_NONE);
+                const lit_node = nd.Node{ .Literal = nd.NodeLiteral.init(lit_value, current.position) };
+                return try lit_node.copy();
+            },
+
             tok.TokenKind.BadToken => {
                 const noop = nd.Node{ .NoOp = nd.NodeNoOp{} };
                 return try noop.copy();
@@ -260,9 +266,28 @@ pub const Parser = struct {
                 return try lit_node.copy();
             },
 
+            tok.TokenKind.HexaInteger => {
+                const hexa_value = try std.fmt.parseInt(u64, self.source.text[current.position.start..current.position.end()], 16);
+                const lit_value = value.Value.init(value.ValueElement{ .Ulong = value.ValueUlong.init(hexa_value) }, value.MODIFIER_NONE);
+                const lit_node = nd.Node{ .Literal = nd.NodeLiteral.init(lit_value, current.position) };
+                return try lit_node.copy();
+            },
+
             tok.TokenKind.String => {
                 const str = self.source.text[current.position.start + 1 .. current.position.end() - 1];
                 const lit_value = value.Value.init(value.ValueElement{ .String = value.ValueString.init(str) }, value.MODIFIER_NONE);
+                const lit_node = nd.Node{ .Literal = nd.NodeLiteral.init(lit_value, current.position) };
+                return try lit_node.copy();
+            },
+
+            tok.TokenKind.False => {
+                const lit_value = value.Value.init(value.ValueElement{ .Bool = value.ValueBool.init(false) }, value.MODIFIER_NONE);
+                const lit_node = nd.Node{ .Literal = nd.NodeLiteral.init(lit_value, current.position) };
+                return try lit_node.copy();
+            },
+
+            tok.TokenKind.True => {
+                const lit_value = value.Value.init(value.ValueElement{ .Bool = value.ValueBool.init(true) }, value.MODIFIER_NONE);
                 const lit_node = nd.Node{ .Literal = nd.NodeLiteral.init(lit_value, current.position) };
                 return try lit_node.copy();
             },

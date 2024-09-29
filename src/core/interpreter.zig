@@ -3,9 +3,11 @@ const std = @import("std");
 const opt = @import("../utils/options.zig");
 const nd = @import("../nodes/node.zig");
 const value = @import("../values/value.zig");
+const vt = @import("../values/type.zig");
 const diagnostic = @import("../utils/diagnostic.zig");
 const Parser = @import("parser.zig").Parser;
 const SourceText = @import("../utils/source_text.zig").SourceText;
+const TokenKind = @import("../utils/token.zig").TokenKind;
 
 pub const Interpreter = struct {
     elements: *std.StringHashMap(value.Value),
@@ -41,18 +43,13 @@ pub const Interpreter = struct {
             const root = try parser.parse();
 
             if (diagnostics.items.len == 0) {
-                std.debug.print("\x1b[90m", .{});
-                root.display(0);
-                std.debug.print("\x1b[0m", .{});
-
-                const val = interp.interpret_node(root);
+                const val = try interp.interpret_node(root);
+                const res = try val.convert(vt.TO_STRING);
                 if (val.modifier & value.MODIFIER_DIAGNOSTIC != 0) {
-                    std.debug.print("\x1b[31m", .{});
-                } else {
-                    std.debug.print("\x1b[32m", .{});
+                    diagnostic.Diagnostic.display_error(res.value.String.value.?, val.value.Error.position, source);
+                } else if (val.value != value.ValueElement.Null) {
+                    std.debug.print("\x1b[32m{?s}\x1b[0m\n", .{res.value.String.value});
                 }
-                val.value.display(0);
-                std.debug.print("\x1b[0m\n", .{});
             } else {
                 for (diagnostics.items) |diag| {
                     diag.display(source);
@@ -71,22 +68,74 @@ pub const Interpreter = struct {
         return 0;
     }
 
-    fn interpret_node(self: *Interpreter, node: *nd.Node) value.Value {
+    fn interpret_node(self: *Interpreter, node: *nd.Node) anyerror!value.Value {
         return switch (node.*) {
             .NoOp => value.Value.init(value.ValueElement{ .Null = value.ValueNull{} }, value.MODIFIER_NONE),
             .Compound => |comp| self.interpret_node_compound(comp),
+            .Unary => |unary| self.interpret_node_unary(unary),
+            .Binary => |binary| self.interpret_node_binary(binary),
             .Literal => |lit| lit.value,
 
-            else => value.Value.init(value.ValueElement{ .Error = value.ValueError.init("TODO", "Implement other interpretations") }, value.MODIFIER_DIAGNOSTIC),
+            else => value.Value.init(value.ValueElement{
+                .Error = value.ValueError.init("TODO", "Implement other interpretations", null),
+            }, value.MODIFIER_DIAGNOSTIC),
         };
     }
 
-    fn interpret_node_compound(self: *Interpreter, node: nd.NodeCompound) value.Value {
+    fn interpret_node_compound(self: *Interpreter, node: nd.NodeCompound) !value.Value {
         var ret_val: value.Value = undefined;
         for (node.nodes) |next_node| {
-            ret_val = self.interpret_node(next_node);
+            ret_val = try self.interpret_node(next_node);
         }
 
         return ret_val;
+    }
+
+    fn interpret_node_unary(self: *Interpreter, node: nd.NodeUnary) !value.Value {
+        const val = try self.interpret_node(node.operand);
+        if (val.modifier & value.MODIFIER_DIAGNOSTIC != 0) {
+            return val;
+        }
+
+        switch (node.operator.kind) {
+            TokenKind.Minus => {
+                return try val.negative(node.operator.position);
+            },
+
+            TokenKind.Not => {
+                return try val.not(node.operator.position);
+            },
+
+            else => {
+                const verr = value.ValueError.init("SeabowUnaryError", "Incorrect unary operator found", node.operator.position);
+                return value.Value.init(value.ValueElement{ .Error = verr }, value.MODIFIER_DIAGNOSTIC);
+            },
+        }
+    }
+
+    fn interpret_node_binary(self: *Interpreter, node: nd.NodeBinary) !value.Value {
+        const lval = try self.interpret_node(node.left);
+        if (lval.modifier & value.MODIFIER_DIAGNOSTIC != 0) {
+            return lval;
+        }
+
+        var rval: ?value.Value = null;
+        if (node.right) |right| {
+            rval = try self.interpret_node(right);
+            if (rval.?.modifier & value.MODIFIER_DIAGNOSTIC != 0) {
+                return rval.?;
+            }
+        }
+
+        switch (node.operator.kind) {
+            TokenKind.Plus => {
+                return try lval.add(rval.?, node.operator.position);
+            },
+
+            else => {
+                const verr = value.ValueError.init("SeabowBinaryError", "Incorrect binary operator found", node.operator.position);
+                return value.Value.init(value.ValueElement{ .Error = verr }, value.MODIFIER_DIAGNOSTIC);
+            },
+        }
     }
 };
