@@ -37,7 +37,7 @@ pub const Interpreter = struct {
                 return 0;
             }
 
-            errdefer std.heap.page_allocator.free(code);
+            defer std.heap.page_allocator.free(code);
             const source = SourceText.init(code);
             var parser = try Parser.init(source, &diagnostics);
             const root = try parser.parse();
@@ -56,15 +56,56 @@ pub const Interpreter = struct {
                 }
             }
 
-            std.heap.page_allocator.free(code);
             diagnostics.clearAndFree();
         }
 
         return 0;
     }
 
-    pub fn interpret_file(options: []opt.Option) u8 {
-        _ = options;
+    pub fn interpret_file(options: []opt.Option) !u8 {
+        var input_file: ?[]const u8 = null;
+        for (options) |option| {
+            if (option.kind == opt.OptionKind.InputFile) {
+                input_file = option.value;
+            }
+        }
+
+        if (input_file == null) {
+            diagnostic.Diagnostic.display_error("InterpreterError: Could not interpret a seabow source file without using option `-i`", null, null);
+            return 0;
+        }
+
+        const source_file = std.fs.cwd().openFile(input_file.?, .{}) catch {
+            diagnostic.Diagnostic.display_error("InterpreterError: Failed to open the given seabow source file of the `-i` option", null, null);
+            return 0;
+        };
+        defer source_file.close();
+
+        const code = try source_file.readToEndAlloc(std.heap.page_allocator, try source_file.getEndPos());
+        defer std.heap.page_allocator.free(code);
+
+        var diagnostics = std.ArrayList(diagnostic.Diagnostic).init(std.heap.page_allocator);
+        defer diagnostics.deinit();
+
+        const source = SourceText.init(code);
+        var parser = try Parser.init(source, &diagnostics);
+        const root = try parser.parse();
+
+        if (diagnostics.items.len == 0) {
+            var interp = Interpreter.init();
+            const val = try interp.interpret_node(root);
+            const res = try val.convert(vt.TO_STRING);
+            if (val.modifier & value.MODIFIER_DIAGNOSTIC != 0) {
+                diagnostic.Diagnostic.display_error(res.value.String.value.?, val.value.Error.position, source);
+            } else if (val.value != value.ValueElement.Null) {
+                std.debug.print("\x1b[32m{?s}\x1b[0m\n", .{res.value.String.value});
+            }
+        } else {
+            for (diagnostics.items) |diag| {
+                diag.display(source);
+            }
+        }
+
         return 0;
     }
 

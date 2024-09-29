@@ -46,10 +46,10 @@ pub const Diagnostic = struct {
         }
     }
 
-    pub fn display_error(message: []const u8, position: ?Position, source: SourceText) void {
+    pub fn display_error(message: []const u8, position: ?Position, source: ?SourceText) void {
         if (position) |pos| {
             const diag = Diagnostic.init(message, pos, DiagnosticKind.Error);
-            diag.display(source);
+            diag.display(source.?);
         } else {
             std.debug.print("\x1b[31m{s}\x1b[0m\n", .{message});
         }

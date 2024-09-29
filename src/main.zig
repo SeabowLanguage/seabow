@@ -7,12 +7,19 @@ const lx = @import("core/lexer.zig");
 const SourceText = @import("utils/source_text.zig").SourceText;
 const options = @import("utils/options.zig");
 
+var arg_options: ?[]options.Option = null;
+
 fn init() !void {
     try lx.init_keywords();
 }
 
 fn destroy() void {
     lx.delete_keywords();
+    if (arg_options) |opts| {
+        for (opts) |opt| {
+            opt.free();
+        }
+    }
 }
 
 fn catch_error(err: anyerror, ret: u8) u8 {
@@ -28,19 +35,21 @@ pub fn main() u8 {
     defer destroy();
 
     var return_value: u8 = 0;
-    const arg_options = options.Option.parse_options() catch |err| {
+    arg_options = options.Option.parse_command() catch |err| {
         return catch_error(err, 2);
     };
 
-    switch (arg_options[0].kind) {
+    switch (arg_options.?[0].kind) {
         options.OptionKind.ConsoleInterpret => {
-            return_value = Interpreter.interpret_console(arg_options) catch |err| {
+            return_value = Interpreter.interpret_console(arg_options.?) catch |err| {
                 return catch_error(err, 3);
             };
         },
 
         options.OptionKind.Interpret => {
-            return_value = Interpreter.interpret_file(arg_options);
+            return_value = Interpreter.interpret_file(arg_options.?) catch |err| {
+                return catch_error(err, 4);
+            };
         },
 
         else => {

@@ -1,1 +1,3 @@
 .zig-cache
+build/windows/arm64/*.pdb
+build/windows/x64/*.pdb
