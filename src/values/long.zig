@@ -26,6 +26,35 @@ pub const ValueLong = struct {
                 return value.Value.init(value.ValueElement{ .Long = val_long }, value.MODIFIER_NONE);
             },
 
+            .Double => |double| {
+                const lval: f64 = @floatFromInt(self.value.?);
+                const val_double = value.ValueDouble.init(lval + double.value.?);
+                return value.Value.init(value.ValueElement{ .Double = val_double }, value.MODIFIER_NONE);
+            },
+
+            else => return null,
+        }
+    }
+
+    pub fn substract(self: ValueLong, other: value.Value) ?value.Value {
+        switch (other.value) {
+            .Long => |long| {
+                const val_long = ValueLong.init(self.value.? - long.value.?);
+                return value.Value.init(value.ValueElement{ .Long = val_long }, value.MODIFIER_NONE);
+            },
+
+            .Ulong => |ulong| {
+                const right: i64 = @bitCast(ulong.value.?);
+                const val_long = ValueLong.init(self.value.? - right);
+                return value.Value.init(value.ValueElement{ .Long = val_long }, value.MODIFIER_NONE);
+            },
+
+            .Double => |double| {
+                const lval: f64 = @floatFromInt(self.value.?);
+                const val_double = value.ValueDouble.init(lval - double.value.?);
+                return value.Value.init(value.ValueElement{ .Double = val_double }, value.MODIFIER_NONE);
+            },
+
             else => return null,
         }
     }

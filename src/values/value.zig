@@ -164,6 +164,10 @@ pub const Value = struct {
                 ret = ulong.add(other);
             },
 
+            .Double => |double| {
+                ret = double.add(other);
+            },
+
             else => {},
         }
 
@@ -171,6 +175,35 @@ pub const Value = struct {
             return returned;
         } else {
             return try Value.binary_operation_error(self, "+", other, pos);
+        }
+    }
+
+    pub fn substract(self: Value, other: Value, pos: Position) !Value {
+        if (self.is_null() or other.is_null()) {
+            return Value.null_operation_error(pos);
+        }
+
+        var ret: ?Value = null;
+        switch (self.value) {
+            .Long => |long| {
+                ret = long.substract(other);
+            },
+
+            .Ulong => |ulong| {
+                ret = ulong.substract(other);
+            },
+
+            .Double => |double| {
+                ret = double.substract(other);
+            },
+
+            else => {},
+        }
+
+        if (ret) |returned| {
+            return returned;
+        } else {
+            return try Value.binary_operation_error(self, "-", other, pos);
         }
     }
 

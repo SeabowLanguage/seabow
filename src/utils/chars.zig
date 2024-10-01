@@ -52,3 +52,52 @@ pub fn print_multi_char(char: u8, count: usize) void {
         std.debug.print("{s}", .{buffer[0..remaining]});
     }
 }
+
+fn char_value(c: u8) ?u8 {
+    if (c >= '0' and c <= '9') {
+        return c - '0';
+    } else if (c >= 'A' and c <= 'Z') {
+        return c - 'A';
+    } else if (c >= 'a' and c <= 'z') {
+        return c - 'a';
+    }
+
+    return null;
+}
+
+pub fn decode_integer(word: []const u8, base: u8) u64 {
+    var result: u64 = 0;
+    for (word) |c| {
+        const digit = char_value(c);
+        if (digit) |val| {
+            result = result * base + val;
+        }
+    }
+
+    return result;
+}
+
+pub fn decode_decimal(word: []const u8) f64 {
+    var result: f64 = 0;
+    var is_fraction = false;
+    var fraction_multiplier: f64 = 1;
+
+    for (word) |c| {
+        if (c == '.') {
+            is_fraction = true;
+            continue;
+        }
+
+        if (c >= '0' and c <= '9') {
+            const val: f64 = @floatFromInt(c - '0');
+            if (is_fraction) {
+                fraction_multiplier /= 10.0;
+                result += val * fraction_multiplier;
+            } else {
+                result = result * 10 + val;
+            }
+        }
+    }
+
+    return result;
+}

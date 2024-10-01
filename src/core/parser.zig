@@ -1,4 +1,5 @@
 const std = @import("std");
+const chars = @import("../utils/chars.zig");
 const SourceText = @import("../utils/source_text.zig").SourceText;
 const Lexer = @import("lexer.zig").Lexer;
 const nd = @import("../nodes/node.zig");
@@ -239,35 +240,35 @@ pub const Parser = struct {
             },
 
             tok.TokenKind.Integer => {
-                const int_value = try std.fmt.parseInt(u64, self.source.text[current.position.start..current.position.end()], 10);
+                const int_value = chars.decode_integer(self.source.text[current.position.start..current.position.end()], 10);
                 const lit_value = value.Value.init(value.ValueElement{ .Ulong = value.ValueUlong.init(int_value) }, value.MODIFIER_NONE);
                 const lit_node = nd.Node{ .Literal = nd.NodeLiteral.init(lit_value, current.position) };
                 return try lit_node.copy();
             },
 
             tok.TokenKind.Decimal => {
-                const flt_value = try std.fmt.parseFloat(f64, self.source.text[current.position.start..current.position.end()]);
+                const flt_value = chars.decode_decimal(self.source.text[current.position.start..current.position.end()]);
                 const lit_value = value.Value.init(value.ValueElement{ .Double = value.ValueDouble.init(flt_value) }, value.MODIFIER_NONE);
                 const lit_node = nd.Node{ .Literal = nd.NodeLiteral.init(lit_value, current.position) };
                 return try lit_node.copy();
             },
 
             tok.TokenKind.BinaryInteger => {
-                const bin_value = try std.fmt.parseInt(u64, self.source.text[current.position.start..current.position.end()], 2);
+                const bin_value = chars.decode_integer(self.source.text[current.position.start..current.position.end()], 2);
                 const lit_value = value.Value.init(value.ValueElement{ .Ulong = value.ValueUlong.init(bin_value) }, value.MODIFIER_NONE);
                 const lit_node = nd.Node{ .Literal = nd.NodeLiteral.init(lit_value, current.position) };
                 return try lit_node.copy();
             },
 
             tok.TokenKind.OctalInteger => {
-                const oct_value = try std.fmt.parseInt(u64, self.source.text[current.position.start..current.position.end()], 8);
+                const oct_value = chars.decode_integer(self.source.text[current.position.start..current.position.end()], 8);
                 const lit_value = value.Value.init(value.ValueElement{ .Ulong = value.ValueUlong.init(oct_value) }, value.MODIFIER_NONE);
                 const lit_node = nd.Node{ .Literal = nd.NodeLiteral.init(lit_value, current.position) };
                 return try lit_node.copy();
             },
 
             tok.TokenKind.HexaInteger => {
-                const hexa_value = try std.fmt.parseInt(u64, self.source.text[current.position.start..current.position.end()], 16);
+                const hexa_value = chars.decode_integer(self.source.text[current.position.start..current.position.end()], 16);
                 const lit_value = value.Value.init(value.ValueElement{ .Ulong = value.ValueUlong.init(hexa_value) }, value.MODIFIER_NONE);
                 const lit_node = nd.Node{ .Literal = nd.NodeLiteral.init(lit_value, current.position) };
                 return try lit_node.copy();

@@ -81,7 +81,8 @@ pub const Interpreter = struct {
         };
         defer source_file.close();
 
-        const code = try source_file.readToEndAlloc(std.heap.page_allocator, try source_file.getEndPos());
+        const file_size: usize = @intCast(try source_file.getEndPos()); // 32-bit only
+        const code = try source_file.readToEndAlloc(std.heap.page_allocator, file_size);
         defer std.heap.page_allocator.free(code);
 
         var diagnostics = std.ArrayList(diagnostic.Diagnostic).init(std.heap.page_allocator);
@@ -171,6 +172,10 @@ pub const Interpreter = struct {
         switch (node.operator.kind) {
             TokenKind.Plus => {
                 return try lval.add(rval.?, node.operator.position);
+            },
+
+            TokenKind.Minus => {
+                return try lval.substract(rval.?, node.operator.position);
             },
 
             else => {

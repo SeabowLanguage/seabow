@@ -346,9 +346,9 @@ pub const Lexer = struct {
         const number_position = Position.init(start, self.index - start);
         if (current == 'i') {
             self.advance();
-            if (mode == 'd') {
+            if (mode != 'i') {
                 const err_pos = Position.init(self.index - 1, 1);
-                const diag = diagnostic.Diagnostic.init("Number modifier `i` could not be used with decimal number", err_pos, diagnostic.DiagnosticKind.Error);
+                const diag = diagnostic.Diagnostic.init("Number modifier `i` could only be used with integer number", err_pos, diagnostic.DiagnosticKind.Error);
                 try self.diagnostics.append(diag);
 
                 return tok.Token.init(tok.TokenKind.BadToken, err_pos);
