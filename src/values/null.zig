@@ -24,4 +24,16 @@ pub const ValueNull = struct {
             },
         }
     }
+
+    pub fn auto_convert(_: ValueNull, to: vt.ValueType) ?value.Value {
+        switch (to.kind) {
+            value.ValueKind.Long => {
+                return value.Value.init(value.ValueElement{ .Long = value.ValueLong.init(null) }, value.MODIFIER_NONE);
+            },
+
+            else => {
+                return null;
+            },
+        }
+    }
 };

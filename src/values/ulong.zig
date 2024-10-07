@@ -47,8 +47,8 @@ pub const ValueUlong = struct {
             .Ulong => |ulong| {
                 const left: i64 = @bitCast(self.value.?);
                 const right: i64 = @bitCast(ulong.value.?);
-                const val_ulong = ValueUlong.init(@bitCast(left - right));
-                return value.Value.init(value.ValueElement{ .Ulong = val_ulong }, value.MODIFIER_NONE);
+                const val_long = value.ValueLong.init(left - right);
+                return value.Value.init(value.ValueElement{ .Long = val_long }, value.MODIFIER_NONE);
             },
 
             .Double => |double| {

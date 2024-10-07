@@ -64,6 +64,29 @@ pub const ValueDouble = struct {
         return value.Value.init(value.ValueElement{ .Double = double }, value.MODIFIER_NONE);
     }
 
+    pub fn times(self: ValueDouble, other: value.Value) ?value.Value {
+        switch (other.value) {
+            .Long => |long| {
+                const right: f64 = @floatFromInt(long.value.?);
+                const val_double = ValueDouble.init(self.value.? * right);
+                return value.Value.init(value.ValueElement{ .Double = val_double }, value.MODIFIER_NONE);
+            },
+
+            .Ulong => |ulong| {
+                const right: f64 = @floatFromInt(ulong.value.?);
+                const val_double = ValueDouble.init(self.value.? * right);
+                return value.Value.init(value.ValueElement{ .Double = val_double }, value.MODIFIER_NONE);
+            },
+
+            .Double => |double| {
+                const val_double = ValueDouble.init(self.value.? * double.value.?);
+                return value.Value.init(value.ValueElement{ .Double = val_double }, value.MODIFIER_NONE);
+            },
+
+            else => return null,
+        }
+    }
+
     pub fn convert(self: ValueDouble, to: vt.ValueType) !?value.Value {
         switch (to.kind) {
             value.ValueKind.String => {

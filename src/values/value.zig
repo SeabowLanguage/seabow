@@ -38,14 +38,14 @@ pub const ValueKind = enum(u8) {
     pub fn repr(self: ValueKind) []const u8 {
         return switch (self) {
             ValueKind.None => "",
-            ValueKind.Long => "<long>",
-            ValueKind.Ulong => "<ulong>",
-            ValueKind.Double => "<double>",
-            ValueKind.Bool => "<bool>",
-            ValueKind.Char => "<char>",
-            ValueKind.String => "<string>",
-            ValueKind.Error => "<error>",
-            ValueKind.Type => "<type>",
+            ValueKind.Long => "long",
+            ValueKind.Ulong => "ulong",
+            ValueKind.Double => "double",
+            ValueKind.Bool => "bool",
+            ValueKind.Char => "char",
+            ValueKind.String => "string",
+            ValueKind.Error => "error",
+            ValueKind.Type => "type",
         };
     }
 };
@@ -122,13 +122,25 @@ pub const Value = struct {
 
     fn convert_error(from: Value, to: vt.ValueType) anyerror!Value {
         const ftype = try (try from.convert(vt.TO_TYPE)).convert(vt.TO_STRING);
-        const ttype = to.convert(vt.TO_STRING).?;
+        const ttype = (try to.convert(vt.TO_STRING)).?;
 
         var err_dtls = std.ArrayList(u8).init(std.heap.page_allocator);
         errdefer err_dtls.deinit();
         try err_dtls.writer().print("Undefined convertion from type {s} to type {s}", .{ ftype.value.String.value.?, ttype.value.String.value.? });
 
         const verr = ValueError.init("ConvertionError", try err_dtls.toOwnedSlice(), null);
+        return Value.init(ValueElement{ .Error = verr }, MODIFIER_DIAGNOSTIC);
+    }
+
+    fn auto_convert_error(from: Value, to: vt.ValueType) anyerror!Value {
+        const ftype = try (try from.convert(vt.TO_TYPE)).convert(vt.TO_STRING);
+        const ttype = (try to.convert(vt.TO_STRING)).?;
+
+        var err_dtls = std.ArrayList(u8).init(std.heap.page_allocator);
+        errdefer err_dtls.deinit();
+        try err_dtls.writer().print("Undefined auto convertion from type {s} to type {s}", .{ ftype.value.String.value.?, ttype.value.String.value.? });
+
+        const verr = ValueError.init("AutoConvertionError", try err_dtls.toOwnedSlice(), null);
         return Value.init(ValueElement{ .Error = verr }, MODIFIER_DIAGNOSTIC);
     }
 
@@ -236,6 +248,27 @@ pub const Value = struct {
         }
     }
 
+    pub fn times(self: Value, other: Value, pos: Position) !Value {
+        if (self.is_null() or other.is_null()) {
+            return Value.null_operation_error(pos);
+        }
+
+        var ret: ?Value = null;
+        switch (self.value) {
+            .Double => |double| {
+                ret = double.times(other);
+            },
+
+            else => {},
+        }
+
+        if (ret) |returned| {
+            return returned;
+        } else {
+            return try Value.binary_operation_error(self, "*", other, pos);
+        }
+    }
+
     pub fn not(self: Value, pos: Position) !Value {
         if (self.is_null()) {
             const val = ValueBool.init(true);
@@ -290,7 +323,7 @@ pub const Value = struct {
             },
 
             .Type => |vtype| {
-                ret = vtype.convert(to);
+                ret = try vtype.convert(to);
             },
         }
 
@@ -298,6 +331,21 @@ pub const Value = struct {
             return returned;
         } else {
             return try self.convert_error(to);
+        }
+    }
+
+    pub fn auto_convert(self: Value, to: vt.ValueType) anyerror!Value {
+        var ret: ?Value = null;
+        switch (self.value) {
+            .Null => |nl| ret = nl.auto_convert(to),
+
+            else => {},
+        }
+
+        if (ret) |returned| {
+            return returned;
+        } else {
+            return try self.convert(to);
         }
     }
 };

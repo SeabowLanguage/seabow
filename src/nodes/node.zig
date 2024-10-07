@@ -11,6 +11,10 @@ pub const NodeQuestion = @import("question.zig").NodeQuestion;
 pub const NodeBreak = @import("controller.zig").NodeBreak;
 pub const NodeContinue = @import("controller.zig").NodeContinue;
 pub const NodeReturn = @import("return.zig").NodeReturn;
+pub const NodeType = @import("type.zig").NodeType;
+pub const NodeVarConstAccess = @import("var_const_access.zig").NodeVarConstAccess;
+pub const NodeVarConstDecl = @import("var_const_decl.zig").NodeVarConstDecl;
+pub const NodeVarConstDeclList = @import("var_const_decl_list.zig").NodeVarConstDeclList;
 
 pub const Node = union(enum) {
     NoOp: NodeNoOp,
@@ -23,6 +27,8 @@ pub const Node = union(enum) {
     Break: NodeBreak,
     Continue: NodeContinue,
     Return: NodeReturn,
+    VarConstAccess: NodeVarConstAccess,
+    VarConstDeclList: NodeVarConstDeclList,
 
     pub fn copy(self: Node) !*Node {
         const node_ref = try std.heap.page_allocator.create(Node);
@@ -43,6 +49,8 @@ pub const Node = union(enum) {
             .Break => |brk| brk.display(),
             .Continue => |cnt| cnt.display(),
             .Return => |ret| ret.display(indent),
+            .VarConstAccess => |vca| vca.display(),
+            .VarConstDeclList => |vcdl| vcdl.display(indent),
         }
     }
 
@@ -58,6 +66,8 @@ pub const Node = union(enum) {
             .Break => |brk| brk.destroy(),
             .Continue => |cnt| cnt.destroy(),
             .Return => |ret| ret.destroy(),
+            .VarConstAccess => |vca| vca.destroy(),
+            .VarConstDeclList => |vcdl| vcdl.destroy(),
         }
 
         std.heap.page_allocator.destroy(self);

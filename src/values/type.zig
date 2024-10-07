@@ -25,12 +25,28 @@ pub const ValueType = struct {
         std.debug.print("ValueType[{s}]\n", .{self.kind.repr()});
     }
 
-    pub fn convert(self: ValueType, to: ValueType) ?value.Value {
+    pub fn convert(self: ValueType, to: ValueType) !?value.Value {
         switch (to.kind) {
             value.ValueKind.String => {
-                var str_type: []const u8 = self.kind.repr();
-                str_type = if (str_type.len == 0) "<null>" else str_type;
-                const str = value.ValueString.init(str_type);
+                var complete_type = std.ArrayList(u8).init(std.heap.page_allocator);
+                errdefer complete_type.deinit();
+
+                const kind_str = self.kind.repr();
+                if (kind_str.len > 0) {
+                    try complete_type.writer().print("<{s}", .{self.kind.repr()});
+                } else {
+                    // TODO
+                }
+
+                if (self.detail & TYPE_DETAIL_REF != 0) {
+                    try complete_type.append('&');
+                }
+                if (self.detail & TYPE_DETAIL_NOT_NULL != 0) {
+                    try complete_type.append('!');
+                }
+                try complete_type.append('>');
+
+                const str = value.ValueString.init(try complete_type.toOwnedSlice());
                 return value.Value.init(value.ValueElement{ .String = str }, value.MODIFIER_NONE);
             },
 

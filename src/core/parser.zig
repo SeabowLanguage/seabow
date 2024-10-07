@@ -52,6 +52,11 @@ pub const Parser = struct {
         return try ret_node.copy();
     }
 
+    fn nothing() !*nd.Node {
+        const noop = nd.Node{ .NoOp = nd.NodeNoOp{} };
+        return try noop.copy();
+    }
+
     fn skip_new_lines(self: *Parser) void {
         var current = self.get().kind;
         while (current == tok.TokenKind.NewLine) {
@@ -94,6 +99,9 @@ pub const Parser = struct {
         var node: ?nd.Node = null;
         switch (current.kind) {
             tok.TokenKind.LeftBrace => return try self.parse_compound(mod),
+            tok.TokenKind.Var => return try self.parse_var_const_decl(false),
+            tok.TokenKind.Const => return try self.parse_var_const_decl(true),
+
             else => {},
         }
 
@@ -114,8 +122,6 @@ pub const Parser = struct {
             if (actual_current.kind != tok.TokenKind.NewLine and actual_current.kind != tok.TokenKind.Semicolon and actual_current.kind != tok.TokenKind.EndOfFile) {
                 const diag = diagnostic.Diagnostic.init("Needs new-line or semi-colon between two statements", current.position, diagnostic.DiagnosticKind.Error);
                 try self.diagnostics.append(diag);
-                const noop = nd.Node{ .NoOp = nd.NodeNoOp{} };
-                return try noop.copy();
             }
 
             self.skip();
@@ -141,7 +147,7 @@ pub const Parser = struct {
             current = self.get();
         }
 
-        try self.match(tok.TokenKind.RightBrace, "Expected `}` to end the previous block opened with `{`");
+        try self.match(tok.TokenKind.RightBrace, "Expecting `}` to end the previous block opened with `{`");
         const ret_node = nd.Node{ .Compound = nd.NodeCompound{ .nodes = try nodes.toOwnedSlice() } };
         return try ret_node.copy();
     }
@@ -210,10 +216,10 @@ pub const Parser = struct {
     fn parse_question_operation(self: *Parser) !*nd.Node {
         self.skip();
         const condition = try self.parse_statement(MODIFIER_NONE);
-        try self.match(tok.TokenKind.Colon, "Expected `:` after the condition of a question (?) operation");
+        try self.match(tok.TokenKind.Colon, "Expecting `:` after the condition of a question (?) operation");
 
         const first = try self.parse_statement(MODIFIER_NONE);
-        try self.match(tok.TokenKind.Colon, "Expected `:` after the 'true-value' of a question (?) operation");
+        try self.match(tok.TokenKind.Colon, "Expecting `:` after the 'true-value' of a question (?) operation");
 
         const second = try self.parse_statement(MODIFIER_NONE);
         const ret_node = nd.Node{ .Question = nd.NodeQuestion.init(condition, first, second) };
@@ -235,8 +241,7 @@ pub const Parser = struct {
             },
 
             tok.TokenKind.BadToken => {
-                const noop = nd.Node{ .NoOp = nd.NodeNoOp{} };
-                return try noop.copy();
+                return try Parser.nothing();
             },
 
             tok.TokenKind.Integer => {
@@ -293,12 +298,131 @@ pub const Parser = struct {
                 return try lit_node.copy();
             },
 
+            tok.TokenKind.Identifier => {
+                return try self.parse_access(current);
+            },
+
             else => {
                 const diag = diagnostic.Diagnostic.init("Incorrect statement found", current.position, diagnostic.DiagnosticKind.Error);
                 try self.diagnostics.append(diag);
-                const ret_node = nd.Node{ .NoOp = nd.NodeNoOp{} };
-                return try ret_node.copy();
+                return try Parser.nothing();
             },
         };
+    }
+
+    fn parse_access(self: *Parser, current: tok.Token) !*nd.Node {
+        const actual = self.get();
+        if (actual.kind == tok.TokenKind.Dot) {
+            // TODO
+        } else if (actual.kind == tok.TokenKind.LeftParenthesis) {
+            // TODO
+        }
+
+        const ret = nd.Node{ .VarConstAccess = nd.NodeVarConstAccess.init(self.source.text[current.position.start..current.position.end()], current.position) };
+        return try ret.copy();
+    }
+
+    fn parse_type_declaration(self: *Parser) !nd.NodeType {
+        const start = self.advance();
+        if (start.kind != tok.TokenKind.Identifier) {
+            const diag = diagnostic.Diagnostic.init("Seabow types should beggin with an identifier", start.position, diagnostic.DiagnosticKind.Error);
+            try self.diagnostics.append(diag);
+        }
+
+        var details: u2 = value.vt.TYPE_DETAIL_NONE;
+        var current = self.get();
+        while (current.kind == tok.TokenKind.Not or current.kind == tok.TokenKind.Ampersand) {
+            if (current.kind == tok.TokenKind.Not) {
+                if (details & value.vt.TYPE_DETAIL_NOT_NULL != 0) {
+                    const diag = diagnostic.Diagnostic.init("Seabow types can only contain 1 `!` to be marked as not-null", current.position, diagnostic.DiagnosticKind.Error);
+                    try self.diagnostics.append(diag);
+                }
+                details |= value.vt.TYPE_DETAIL_NOT_NULL;
+            } else {
+                if (details & value.vt.TYPE_DETAIL_REF != 0) {
+                    const diag = diagnostic.Diagnostic.init("Seabow types can only contain 1 `&` to be marked as a reference", current.position, diagnostic.DiagnosticKind.Error);
+                    try self.diagnostics.append(diag);
+                }
+                details |= value.vt.TYPE_DETAIL_REF;
+            }
+
+            self.skip();
+            current = self.get();
+        }
+
+        var contained: ?std.ArrayList(*nd.NodeType) = null;
+        if (current.kind == tok.TokenKind.LessThan) {
+            contained = std.ArrayList(*nd.NodeType).init(std.heap.page_allocator);
+            self.skip();
+            while (self.get().kind == tok.TokenKind.Identifier) {
+                const other = try self.parse_type_declaration();
+                try contained.?.append(try other.copy());
+                if (self.get().kind == tok.TokenKind.Comma) {
+                    self.skip();
+                }
+            }
+
+            try self.match(tok.TokenKind.GreaterThan, "Expecting `>` to close a type who contained other sub-types");
+        }
+
+        var final_contained: ?[]*nd.NodeType = null;
+        if (contained != null) {
+            final_contained = try contained.?.toOwnedSlice();
+        }
+
+        return nd.NodeType.init(Position.init(start.position.start, self.get().position.end() - start.position.start), self.source.text[start.position.start..start.position.end()], details, final_contained);
+    }
+
+    fn parse_var_const_decl(self: *Parser, constant: bool) !*nd.Node {
+        const start = self.advance();
+        var declarations = std.ArrayList(nd.NodeVarConstDecl).init(std.heap.page_allocator);
+
+        while (self.get().kind == tok.TokenKind.Identifier) {
+            const begin = self.advance();
+            if (begin.kind != tok.TokenKind.Identifier) {
+                const diag = diagnostic.Diagnostic.init("Variable or constant declaration needs an identifier", begin.position, diagnostic.DiagnosticKind.Error);
+                try self.diagnostics.append(diag);
+            }
+
+            var decl_type: ?nd.NodeType = null;
+            var expr: ?*nd.Node = null;
+
+            if (self.get().kind == tok.TokenKind.Colon) {
+                self.skip();
+                decl_type = try self.parse_type_declaration();
+            }
+
+            if (self.get().kind == tok.TokenKind.Assign) {
+                self.skip();
+                expr = try self.parse_statement(MODIFIER_NONE);
+                if (expr.?.* == nd.Node.Eof) {
+                    const diag = diagnostic.Diagnostic.init("`=` after declaration need a correct expression", begin.position, diagnostic.DiagnosticKind.Error);
+                    try self.diagnostics.append(diag);
+                }
+            }
+
+            if (decl_type == null and expr == null) {
+                const diag = diagnostic.Diagnostic.init("Variable or constant declaration needs a type or an assignated expression", begin.position, diagnostic.DiagnosticKind.Error);
+                try self.diagnostics.append(diag);
+            }
+
+            try declarations.append(nd.NodeVarConstDecl.init(self.source.text[begin.position.start..begin.position.end()], begin.position, decl_type, expr));
+
+            const actual = self.get();
+            if (actual.kind == tok.TokenKind.Comma) {
+                self.skip();
+            } else if (actual.kind == tok.TokenKind.Identifier) {
+                const diag = diagnostic.Diagnostic.init("Multiple variable or constant declarations need a `,` separator", actual.position, diagnostic.DiagnosticKind.Error);
+                try self.diagnostics.append(diag);
+            }
+        }
+
+        if (declarations.items.len == 0) {
+            const diag = diagnostic.Diagnostic.init("`var` or `const` keyword need at least one variable or constant declaration", start.position, diagnostic.DiagnosticKind.Error);
+            try self.diagnostics.append(diag);
+        }
+
+        const ret = nd.Node{ .VarConstDeclList = nd.NodeVarConstDeclList.init(try declarations.toOwnedSlice(), constant) };
+        return try ret.copy();
     }
 };

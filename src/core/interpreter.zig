@@ -10,11 +10,20 @@ const SourceText = @import("../utils/source_text.zig").SourceText;
 const TokenKind = @import("../utils/token.zig").TokenKind;
 
 pub const Interpreter = struct {
-    elements: *std.StringHashMap(value.Value),
+    elements: std.StringHashMap(value.Value),
 
-    fn init() Interpreter {
-        var elements = std.StringHashMap(value.Value).init(std.heap.page_allocator);
-        return Interpreter{ .elements = &elements };
+    fn init() !Interpreter {
+        var interp = Interpreter{ .elements = std.StringHashMap(value.Value).init(std.heap.page_allocator) };
+
+        try interp.elements.put("long", value.Value.init(value.ValueElement{ .Type = vt.ValueType.init(value.ValueKind.Long, vt.TYPE_DETAIL_NONE) }, value.MODIFIER_CONSTANT));
+        try interp.elements.put("ulong", value.Value.init(value.ValueElement{ .Type = vt.ValueType.init(value.ValueKind.Ulong, vt.TYPE_DETAIL_NONE) }, value.MODIFIER_CONSTANT));
+        try interp.elements.put("double", value.Value.init(value.ValueElement{ .Type = vt.ValueType.init(value.ValueKind.Double, vt.TYPE_DETAIL_NONE) }, value.MODIFIER_CONSTANT));
+        try interp.elements.put("bool", value.Value.init(value.ValueElement{ .Type = vt.ValueType.init(value.ValueKind.Bool, vt.TYPE_DETAIL_NONE) }, value.MODIFIER_CONSTANT));
+        try interp.elements.put("string", value.Value.init(value.ValueElement{ .Type = vt.ValueType.init(value.ValueKind.String, vt.TYPE_DETAIL_NONE) }, value.MODIFIER_CONSTANT));
+        try interp.elements.put("error", value.Value.init(value.ValueElement{ .Type = vt.ValueType.init(value.ValueKind.Error, vt.TYPE_DETAIL_NONE) }, value.MODIFIER_CONSTANT));
+        try interp.elements.put("type", value.Value.init(value.ValueElement{ .Type = vt.ValueType.init(value.ValueKind.Type, vt.TYPE_DETAIL_NONE) }, value.MODIFIER_CONSTANT));
+
+        return interp;
     }
 
     fn destroy(self: Interpreter) void {
@@ -26,7 +35,7 @@ pub const Interpreter = struct {
         const stdin = std.io.getStdIn().reader();
         var diagnostics = std.ArrayList(diagnostic.Diagnostic).init(std.heap.page_allocator);
         defer diagnostics.deinit();
-        var interp = Interpreter.init();
+        var interp = try Interpreter.init();
 
         while (true) {
             std.debug.print(">>> ", .{});
@@ -93,7 +102,7 @@ pub const Interpreter = struct {
         const root = try parser.parse();
 
         if (diagnostics.items.len == 0) {
-            var interp = Interpreter.init();
+            var interp = try Interpreter.init();
             const val = try interp.interpret_node(root);
             const res = try val.convert(vt.TO_STRING);
             if (val.modifier & value.MODIFIER_DIAGNOSTIC != 0) {
@@ -117,6 +126,8 @@ pub const Interpreter = struct {
             .Unary => |unary| self.interpret_node_unary(unary),
             .Binary => |binary| self.interpret_node_binary(binary),
             .Literal => |lit| lit.value,
+            .VarConstAccess => |vc| self.interpret_node_var_const_access(vc),
+            .VarConstDeclList => |vcdl| self.interpret_node_var_const_decl_list(vcdl),
 
             else => value.Value.init(value.ValueElement{
                 .Error = value.ValueError.init("TODO", "Implement other interpretations", null),
@@ -128,6 +139,9 @@ pub const Interpreter = struct {
         var ret_val: value.Value = undefined;
         for (node.nodes) |next_node| {
             ret_val = try self.interpret_node(next_node);
+            if (ret_val.modifier & value.MODIFIER_DIAGNOSTIC != 0) {
+                return ret_val;
+            }
         }
 
         return ret_val;
@@ -178,10 +192,87 @@ pub const Interpreter = struct {
                 return try lval.substract(rval.?, node.operator.position);
             },
 
+            TokenKind.Star => {
+                return try lval.times(rval.?, node.operator.position);
+            },
+
             else => {
                 const verr = value.ValueError.init("SeabowBinaryError", "Incorrect binary operator found", node.operator.position);
                 return value.Value.init(value.ValueElement{ .Error = verr }, value.MODIFIER_DIAGNOSTIC);
             },
         }
+    }
+
+    fn interpret_node_var_const_access(self: *Interpreter, node: nd.NodeVarConstAccess) !value.Value {
+        const val = self.elements.get(node.name);
+        if (val) |ret_val| {
+            return ret_val;
+        }
+
+        const verr = value.ValueError.init("AccessError", "Cannot access to an undefined variable or constant", node.position);
+        return value.Value.init(value.ValueElement{ .Error = verr }, value.MODIFIER_DIAGNOSTIC);
+    }
+
+    fn interpret_node_var_const_decl_list(self: *Interpreter, node: nd.NodeVarConstDeclList) !value.Value {
+        for (node.declarations) |decl| {
+            const val = try self.interpret_node_var_const_decl(decl, node.constant);
+            if (val.modifier & value.MODIFIER_DIAGNOSTIC != 0) {
+                return val;
+            }
+        }
+
+        return value.Value.init(value.ValueElement{ .Null = value.ValueNull{} }, value.MODIFIER_NONE);
+    }
+
+    fn interpret_node_type(self: *Interpreter, node: nd.NodeType) !value.Value {
+        var vtype = self.elements.get(node.base);
+        if (vtype != null) {
+            if (vtype.?.value == value.ValueElement.Type) {
+                vtype.?.value.Type.detail = node.details;
+                return vtype.?;
+            }
+        }
+
+        const verr = value.ValueError.init("TypeError", "Cannot access to an undefined type", node.position);
+        return value.Value.init(value.ValueElement{ .Error = verr }, value.MODIFIER_DIAGNOSTIC);
+    }
+
+    fn interpret_node_var_const_decl(self: *Interpreter, node: nd.NodeVarConstDecl, constant: bool) !value.Value {
+        if (self.elements.contains(node.name)) {
+            const verr = value.ValueError.init("DeclarationError", "Cannot declare a variable or a constant twice", node.position);
+            return value.Value.init(value.ValueElement{ .Error = verr }, value.MODIFIER_DIAGNOSTIC);
+        }
+
+        var val: value.Value = undefined;
+        if (node.expression) |expr| {
+            val = try self.interpret_node(expr);
+            if (val.modifier & value.MODIFIER_DIAGNOSTIC != 0) {
+                return val;
+            }
+
+            if (node.ntype) |ntype| {
+                const vtype = (try self.interpret_node_type(ntype)).value.Type;
+                val = try val.auto_convert(vtype);
+            }
+        } else {
+            const vtype = (try self.interpret_node_type(node.ntype.?)).value.Type;
+            const null_val = value.Value.init(value.ValueElement{ .Null = value.ValueNull{} }, value.MODIFIER_NONE);
+            val = try null_val.auto_convert(vtype);
+        }
+
+        if (val.modifier & value.MODIFIER_DIAGNOSTIC != 0) {
+            return val;
+        }
+
+        const modifier = if (constant) value.MODIFIER_CONSTANT else value.MODIFIER_NONE;
+        val.modifier |= modifier;
+
+        var key = std.ArrayList(u8).init(std.heap.page_allocator);
+        errdefer key.deinit();
+        try key.writer().print("{s}", .{node.name});
+
+        try self.elements.put(try key.toOwnedSlice(), val);
+
+        return value.Value.init(value.ValueElement{ .Null = value.ValueNull{} }, value.MODIFIER_NONE);
     }
 };
