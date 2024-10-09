@@ -67,6 +67,31 @@ pub const ValueUlong = struct {
         return value.Value.init(value.ValueElement{ .Long = long }, value.MODIFIER_NONE);
     }
 
+    pub fn times(self: ValueUlong, other: value.Value) ?value.Value {
+        switch (other.value) {
+            .Long => |long| {
+                const left_val: i64 = @bitCast(self.value.?);
+                const val_long = value.ValueLong.init(left_val * long.value.?);
+                return value.Value.init(value.ValueElement{ .Long = val_long }, value.MODIFIER_NONE);
+            },
+
+            .Ulong => |ulong| {
+                const left_val: i64 = @bitCast(self.value.?);
+                const right_val: i64 = @bitCast(ulong.value.?);
+                const val_long = value.ValueLong.init(left_val * right_val);
+                return value.Value.init(value.ValueElement{ .Long = val_long }, value.MODIFIER_NONE);
+            },
+
+            .Double => |double| {
+                const left_val: f64 = @floatFromInt(self.value.?);
+                const val_double = value.ValueDouble.init(left_val + double.value.?);
+                return value.Value.init(value.ValueElement{ .Double = val_double }, value.MODIFIER_NONE);
+            },
+
+            else => return null,
+        }
+    }
+
     pub fn convert(self: ValueUlong, to: vt.ValueType) !?value.Value {
         switch (to.kind) {
             value.ValueKind.String => {

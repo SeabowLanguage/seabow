@@ -31,9 +31,19 @@ pub const ValueNull = struct {
                 return value.Value.init(value.ValueElement{ .Long = value.ValueLong.init(null) }, value.MODIFIER_NONE);
             },
 
-            else => {
-                return null;
+            value.ValueKind.Ulong => {
+                return value.Value.init(value.ValueElement{ .Ulong = value.ValueUlong.init(null) }, value.MODIFIER_NONE);
             },
+
+            value.ValueKind.Double => {
+                return value.Value.init(value.ValueElement{ .Double = value.ValueDouble.init(null) }, value.MODIFIER_NONE);
+            },
+
+            value.ValueKind.Bool => {
+                return value.Value.init(value.ValueElement{ .Bool = value.ValueBool.init(null) }, value.MODIFIER_NONE);
+            },
+
+            else => return null,
         }
     }
 };

@@ -12,10 +12,9 @@ pub const ValueError = @import("error.zig").ValueError;
 pub const vt = @import("type.zig");
 
 pub const MODIFIER_NONE: u4 = 0b0000;
-pub const MODIFIER_POINTER: u4 = 0b0001;
-pub const MODIFIER_NOT_NULLABLE: u4 = 0b0010;
-pub const MODIFIER_CONSTANT: u4 = 0b0100;
-pub const MODIFIER_DIAGNOSTIC: u4 = 0b1000;
+pub const MODIFIER_NOT_NULLABLE: u4 = 0b0001;
+pub const MODIFIER_CONSTANT: u4 = 0b0010;
+pub const MODIFIER_DIAGNOSTIC: u4 = 0b0100;
 
 pub const ValueKind = enum(u8) {
     // Special
@@ -37,7 +36,7 @@ pub const ValueKind = enum(u8) {
 
     pub fn repr(self: ValueKind) []const u8 {
         return switch (self) {
-            ValueKind.None => "",
+            ValueKind.None => "null",
             ValueKind.Long => "long",
             ValueKind.Ulong => "ulong",
             ValueKind.Double => "double",
@@ -180,6 +179,10 @@ pub const Value = struct {
                 ret = double.add(other);
             },
 
+            .String => |string| {
+                ret = try string.add(other);
+            },
+
             else => {},
         }
 
@@ -255,6 +258,14 @@ pub const Value = struct {
 
         var ret: ?Value = null;
         switch (self.value) {
+            .Long => |long| {
+                ret = long.times(other);
+            },
+
+            .Ulong => |ulong| {
+                ret = ulong.times(other);
+            },
+
             .Double => |double| {
                 ret = double.times(other);
             },

@@ -251,13 +251,21 @@ pub const Interpreter = struct {
             }
 
             if (node.ntype) |ntype| {
-                const vtype = (try self.interpret_node_type(ntype)).value.Type;
-                val = try val.auto_convert(vtype);
+                const vtype = (try self.interpret_node_type(ntype));
+                if (vtype.modifier & value.MODIFIER_DIAGNOSTIC != 0) {
+                    return vtype;
+                }
+
+                val = try val.auto_convert(vtype.value.Type);
             }
         } else {
-            const vtype = (try self.interpret_node_type(node.ntype.?)).value.Type;
+            const vtype = (try self.interpret_node_type(node.ntype.?));
+            if (vtype.modifier & value.MODIFIER_DIAGNOSTIC != 0) {
+                return vtype;
+            }
+
             const null_val = value.Value.init(value.ValueElement{ .Null = value.ValueNull{} }, value.MODIFIER_NONE);
-            val = try null_val.auto_convert(vtype);
+            val = try null_val.auto_convert(vtype.value.Type);
         }
 
         if (val.modifier & value.MODIFIER_DIAGNOSTIC != 0) {

@@ -13,6 +13,20 @@ pub const ValueString = struct {
         std.debug.print("ValueString[{?s}]\n", .{self.value});
     }
 
+    pub fn add(self: ValueString, other: value.Value) !?value.Value {
+        switch (other.value) {
+            .String => |string| {
+                var str = std.ArrayList(u8).init(std.heap.page_allocator);
+                errdefer str.deinit();
+                try str.writer().print("{s}{s}", .{ self.value.?, string.value.? });
+                const val_str = ValueString.init(try str.toOwnedSlice());
+                return value.Value.init(value.ValueElement{ .String = val_str }, value.MODIFIER_NONE);
+            },
+
+            else => return null,
+        }
+    }
+
     pub fn convert(self: ValueString, to: vt.ValueType) ?value.Value {
         switch (to.kind) {
             value.ValueKind.String => {
